@@ -167,7 +167,11 @@ export function ChatColumn({ ws, draft, onDraftChange }: ChatColumnProps) {
             {activeConv!.messages.map((m, messageIndex) => (
               <div key={m.id} className={`msg ${m.role}`}>
                 <div className={`bubble${m.role === "assistant" ? " markdown-message" : ""}`}>
-                  {m.role === "assistant" ? <MarkdownMessage content={m.text} /> : m.text}
+                  {m.role === "assistant" ? (
+                    <MarkdownMessage content={m.text} suppressThematicBreaks />
+                  ) : (
+                    m.text
+                  )}
                 </div>
                 {m.citations.length > 0 && (
                   <div className="citations">

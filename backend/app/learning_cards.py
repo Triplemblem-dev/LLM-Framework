@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from app.ollama_client import chat_structured
+from app.runtime_client import chat_structured
 from app.schemas import LearningCardDraft
 
 MAX_SOURCE_CHARACTERS = 48_000

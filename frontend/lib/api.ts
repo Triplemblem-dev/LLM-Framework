@@ -27,6 +27,11 @@ import {
   OptimizerObjective,
   OptimizerRun,
   PromptLayer,
+  RemoteAccessMode,
+  RemoteAccessStatus,
+  RemoteApiKey,
+  RemoteApiKeyCreated,
+  RemoteConnectionTest,
   SubDomain,
 } from "./types";
 
@@ -76,6 +81,94 @@ export async function verifyToken(token: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+// --- Optional remote access ---
+
+function mapRemoteStatus(raw: any): RemoteAccessStatus {
+  return {
+    mode: raw.mode,
+    gatewayPort: raw.gateway_port,
+    gatewayConfigured: raw.gateway_configured,
+    gatewayRunning: raw.gateway_running,
+    apiBaseUrl: raw.api_base_url,
+    bindAddress: raw.bind_address,
+    hostname: raw.hostname,
+    networkConfigurationValid: raw.network_configuration_valid,
+    networkConfigurationError: raw.network_configuration_error,
+    tailscaleConfigured: raw.tailscale_configured,
+    certificateAvailable: raw.certificate_available,
+    activeKeyCount: raw.active_key_count,
+  };
+}
+
+function mapRemoteKey(raw: any): RemoteApiKey {
+  return {
+    id: raw.id,
+    name: raw.name,
+    tokenPrefix: raw.token_prefix,
+    domainIds: raw.domain_ids ?? [],
+    requestsPerMinute: raw.requests_per_minute,
+    expiresAt: raw.expires_at,
+    revokedAt: raw.revoked_at,
+    lastUsedAt: raw.last_used_at,
+    createdAt: raw.created_at,
+  };
+}
+
+export async function getRemoteAccess(): Promise<RemoteAccessStatus> {
+  return mapRemoteStatus(await request<any>("/remote-access"));
+}
+
+export async function updateRemoteAccess(mode: RemoteAccessMode, gatewayPort = 8443): Promise<RemoteAccessStatus> {
+  return mapRemoteStatus(await request<any>("/remote-access", {
+    method: "PUT",
+    body: JSON.stringify({ mode, gateway_port: gatewayPort }),
+  }));
+}
+
+export async function listRemoteApiKeys(): Promise<RemoteApiKey[]> {
+  return (await request<any[]>("/remote-access/keys")).map(mapRemoteKey);
+}
+
+export async function createRemoteApiKey(
+  name: string,
+  domainIds: string[],
+  requestsPerMinute = 30,
+): Promise<RemoteApiKeyCreated> {
+  const raw = await request<any>("/remote-access/keys", {
+    method: "POST",
+    body: JSON.stringify({ name, domain_ids: domainIds, requests_per_minute: requestsPerMinute }),
+  });
+  return { ...mapRemoteKey(raw), token: raw.token };
+}
+
+export async function revokeRemoteApiKey(keyId: string): Promise<void> {
+  await request(`/remote-access/keys/${keyId}`, { method: "DELETE" });
+}
+
+export async function testRemoteConnection(): Promise<RemoteConnectionTest> {
+  const raw = await request<any>("/remote-access/connection-test", { method: "POST" });
+  return {
+    ready: raw.ready,
+    mode: raw.mode,
+    gatewayConfigured: raw.gateway_configured,
+    gatewayRunning: raw.gateway_running,
+    networkConfigurationValid: raw.network_configuration_valid,
+    detail: raw.detail,
+  };
+}
+
+export async function getRemoteGatewayCertificate(): Promise<Blob> {
+  const headers = new Headers();
+  const token = getToken();
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  const response = await fetch(`${BASE_URL}/remote-access/certificate`, { headers });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(response.status, body.detail ?? `Request failed (${response.status})`);
+  }
+  return response.blob();
 }
 
 // --- Models ---

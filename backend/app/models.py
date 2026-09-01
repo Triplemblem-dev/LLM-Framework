@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import JSON, BigInteger, ForeignKey, Integer, Text, UniqueConstraint, func
+from sqlalchemy import JSON, BigInteger, DateTime, ForeignKey, Integer, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -45,12 +45,58 @@ class RepositoryStatus(str, enum.Enum):
     deleting = "deleting"
 
 
+class RemoteAccessMode(str, enum.Enum):
+    off = "off"
+    local_network = "local_network"
+    private_vpn = "private_vpn"
+
+
 class User(Base):
     __tablename__ = "users"
 
     id: Mapped[uuid.UUID] = _uuid_col()
     email: Mapped[str] = mapped_column(unique=True)
     demo_seeded: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+
+class RemoteAccessConfig(Base):
+    """The single local user's explicit remote-access mode.
+
+    Keeping this in the database makes "off" enforceable by the API even if a
+    gateway container was accidentally left running.
+    """
+
+    __tablename__ = "remote_access_config"
+
+    id: Mapped[uuid.UUID] = _uuid_col()
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), unique=True
+    )
+    mode: Mapped[RemoteAccessMode] = mapped_column(default=RemoteAccessMode.off)
+    gateway_port: Mapped[int] = mapped_column(default=8443)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+
+
+class RemoteApiKey(Base):
+    """A revocable, least-privilege credential for one remote client device."""
+
+    __tablename__ = "remote_api_keys"
+
+    id: Mapped[uuid.UUID] = _uuid_col()
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    name: Mapped[str]
+    token_prefix: Mapped[str] = mapped_column(unique=True)
+    token_hash: Mapped[str] = mapped_column(unique=True)
+    allowed_domain_ids: Mapped[list] = mapped_column(JSON, default=list)
+    can_chat: Mapped[bool] = mapped_column(default=True)
+    can_upload_documents: Mapped[bool] = mapped_column(default=False)
+    can_admin: Mapped[bool] = mapped_column(default=False)
+    requests_per_minute: Mapped[int] = mapped_column(default=30)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 

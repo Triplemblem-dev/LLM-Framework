@@ -165,3 +165,12 @@ export function PerformanceIcon() {
     </svg>
   );
 }
+
+export function NetworkIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <circle cx="9" cy="9" r="2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M4.8 5.1a6 6 0 0 1 8.4 0M2.5 2.8a9.3 9.3 0 0 1 13 0M4.8 12.9a6 6 0 0 0 8.4 0M2.5 15.2a9.3 9.3 0 0 0 13 0" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+    </svg>
+  );
+}

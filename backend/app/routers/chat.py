@@ -17,7 +17,7 @@ from app.deps import get_active_model_profile, get_current_user
 from app.domain_model_settings import effective_model_settings, fit_messages_to_context, ollama_options
 from app.learning_cards import LearningCardSourceTooLong, generate_learning_cards
 from app.models import Conversation, Domain, Message, MessageRole
-from app.ollama_client import chat_stream
+from app.runtime_client import chat_stream
 from app.optimizer.activity import OllamaBusyError, snapshot as ollama_activity_snapshot
 from app.prompt_assembly import assemble, log_retrieval, log_scope_access
 from app.routers.domains import get_owned_domain_or_404

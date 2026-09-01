@@ -3,7 +3,8 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Workspace } from "../lib/useWorkspace";
-import { DocumentIcon, EyeIcon, MemoryIcon, PerformanceIcon, SlidersIcon } from "./icons";
+import * as api from "../lib/api";
+import { DocumentIcon, EyeIcon, MemoryIcon, NetworkIcon, PerformanceIcon, SlidersIcon } from "./icons";
 import {
   CodeRepositoryInfo,
   DocumentInfo,
@@ -22,6 +23,9 @@ import {
   OptimizerPlacement,
   OptimizerRun,
   PromptLayer,
+  RemoteAccessMode,
+  RemoteAccessStatus,
+  RemoteApiKey,
 } from "../lib/types";
 import { MarkdownMessage } from "./MarkdownMessage";
 
@@ -115,6 +119,8 @@ export function RightRail({ ws, draft, open, onDeleteScope }: RightRailProps) {
             }
           : state.rightMode === "optimizer"
             ? { title: "Model Performance Optimizer", detail: "Quick tuning, hardware evidence, and optional benchmarks" }
+            : state.rightMode === "remote"
+              ? { title: "Remote access", detail: "Private access for your own devices" }
             : { title: "Scope settings", detail: "Configure the selected domain or sub-domain" };
 
   return (
@@ -161,6 +167,16 @@ export function RightRail({ ws, draft, open, onDeleteScope }: RightRailProps) {
           <PerformanceIcon />
         </button>
         <button
+          className={`rr-tab${state.rightMode === "remote" ? " on" : ""}`}
+          onClick={() => actions.setRightMode("remote")}
+          type="button"
+          aria-label="Remote access"
+          aria-pressed={state.rightMode === "remote"}
+          title="Remote access"
+        >
+          <NetworkIcon />
+        </button>
+        <button
           className={`rr-tab${state.rightMode === "settings" ? " on" : ""}`}
           onClick={() => actions.setRightMode("settings")}
           type="button"
@@ -185,12 +201,244 @@ export function RightRail({ ws, draft, open, onDeleteScope }: RightRailProps) {
             <MemoryPanel ws={ws} />
           ) : state.rightMode === "optimizer" ? (
             <PerformancePanel ws={ws} />
+          ) : state.rightMode === "remote" ? (
+            <RemoteAccessPanel ws={ws} />
           ) : (
             <Settings ws={ws} onDeleteScope={onDeleteScope} />
           )}
         </PanelAccordion>
       </div>
     </aside>
+  );
+}
+
+function RemoteAccessPanel({ ws }: { ws: Workspace }) {
+  const [status, setStatus] = useState<RemoteAccessStatus | null>(null);
+  const [keys, setKeys] = useState<RemoteApiKey[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [draftMode, setDraftMode] = useState<RemoteAccessMode>("off");
+  const [deviceName, setDeviceName] = useState("");
+  const [selectedDomainIds, setSelectedDomainIds] = useState<string[]>([]);
+  const [newToken, setNewToken] = useState<string | null>(null);
+  const [connectionResult, setConnectionResult] = useState<string | null>(null);
+
+  const domains = ws.state.domains.flatMap((domain) => [
+    { id: domain.id, path: domain.name },
+    ...domain.subdomains.map((subdomain) => ({
+      id: subdomain.id,
+      path: `${domain.name} / ${subdomain.name}`,
+    })),
+  ]);
+
+  async function refresh() {
+    try {
+      const [nextStatus, nextKeys] = await Promise.all([
+        api.getRemoteAccess(),
+        api.listRemoteApiKeys(),
+      ]);
+      setStatus(nextStatus);
+      setDraftMode(nextStatus.mode);
+      setKeys(nextKeys);
+    } catch (error) {
+      ws.actions.pushToast(error instanceof api.ApiError ? error.message : "Could not load remote access settings.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void refresh();
+  }, []);
+
+  async function saveMode() {
+    if (draftMode !== "off" && status?.mode === "off") {
+      const confirmed = window.confirm(
+        "Enable remote API access? Only devices with a key and an approved domain can connect. The HTTPS gateway must also be configured and running."
+      );
+      if (!confirmed) return;
+    }
+    setSaving(true);
+    try {
+      const nextStatus = await api.updateRemoteAccess(draftMode, status?.gatewayPort ?? 8443);
+      setStatus(nextStatus);
+      ws.actions.pushToast(nextStatus.mode === "off" ? "Remote access is off." : "Remote access mode saved.");
+    } catch (error) {
+      ws.actions.pushToast(error instanceof api.ApiError ? error.message : "Could not update remote access.");
+      setDraftMode(status?.mode ?? "off");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function toggleDomain(domainId: string) {
+    setSelectedDomainIds((current) =>
+      current.includes(domainId) ? current.filter((id) => id !== domainId) : [...current, domainId]
+    );
+  }
+
+  async function createKey() {
+    if (!deviceName.trim() || selectedDomainIds.length === 0) {
+      ws.actions.pushToast("Enter a device name and select at least one domain.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const created = await api.createRemoteApiKey(deviceName.trim(), selectedDomainIds);
+      setKeys((current) => [created, ...current]);
+      setNewToken(created.token);
+      setDeviceName("");
+      setSelectedDomainIds([]);
+      ws.actions.pushToast("Device key created. Copy it now; it will not be shown again.");
+    } catch (error) {
+      ws.actions.pushToast(error instanceof api.ApiError ? error.message : "Could not create the device key.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function revokeKey(item: RemoteApiKey) {
+    if (!window.confirm(`Revoke access for “${item.name}”? That device will stop working immediately.`)) return;
+    try {
+      await api.revokeRemoteApiKey(item.id);
+      setKeys((current) => current.map((key) => key.id === item.id ? { ...key, revokedAt: new Date().toISOString() } : key));
+      ws.actions.pushToast("Device key revoked.");
+    } catch (error) {
+      ws.actions.pushToast(error instanceof api.ApiError ? error.message : "Could not revoke the device key.");
+    }
+  }
+
+  async function copyToken() {
+    if (!newToken) return;
+    await navigator.clipboard.writeText(newToken);
+    ws.actions.pushToast("Device key copied.");
+  }
+
+  async function downloadCertificate() {
+    try {
+      const blob = await api.getRemoteGatewayCertificate();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "llm-framework-ca.crt";
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      ws.actions.pushToast(error instanceof api.ApiError ? error.message : "Could not download the certificate.");
+    }
+  }
+
+  async function copyApiUrl() {
+    if (!status) return;
+    await navigator.clipboard.writeText(status.apiBaseUrl);
+    ws.actions.pushToast("API base URL copied.");
+  }
+
+  async function testConnection() {
+    try {
+      const result = await api.testRemoteConnection();
+      setConnectionResult(result.detail);
+      if (result.ready) ws.actions.pushToast("Gateway connection test passed.");
+    } catch (error) {
+      ws.actions.pushToast(error instanceof api.ApiError ? error.message : "Could not test the gateway.");
+    }
+  }
+
+  if (loading) return <p className="empty-state">Loading remote access…</p>;
+
+  return (
+    <>
+      <PanelSection
+        id="remote-mode"
+        title="Connection mode"
+        description="Off by default; choose where your own devices may connect"
+        meta={status?.mode === "off" ? "Off" : status?.mode === "local_network" ? "Local network" : "Private VPN"}
+      >
+        <div className={`remote-status ${status?.mode === "off" ? "off" : "on"}`}>
+          <strong>{status?.mode === "off" ? "Remote access is blocked" : "Remote API access is enabled"}</strong>
+          <span>{status?.gatewayRunning ? "HTTPS gateway is running" : status?.gatewayConfigured ? "Gateway configured but not running" : "Gateway setup is incomplete"}</span>
+        </div>
+        <div className="settings-field">
+          <label>Access from</label>
+          <select value={draftMode} onChange={(event) => setDraftMode(event.target.value as RemoteAccessMode)}>
+            <option value="off">Off — this computer only</option>
+            <option value="local_network">Local network — same Wi-Fi / LAN</option>
+            <option value="private_vpn">Private VPN — Tailscale</option>
+          </select>
+        </div>
+        <button className="btn-primary remote-full-button" type="button" onClick={saveMode} disabled={saving || draftMode === status?.mode}>
+          {saving ? "Saving…" : "Apply mode"}
+        </button>
+        {!status?.gatewayConfigured && (
+          <p className="remote-warning">Set the gateway secret and network address in the private runtime .env, then start the optional gateway. The app will not expose itself automatically.</p>
+        )}
+        {status?.networkConfigurationError && <p className="remote-warning">{status.networkConfigurationError}</p>}
+        {status && <p className="settings-hint">Selected host interface: <code>{status.bindAddress}</code></p>}
+      </PanelSection>
+
+      <PanelSection
+        id="remote-device-keys"
+        title="Device keys"
+        description="Give each phone or laptop its own revocable key"
+        meta={`${keys.filter((key) => !key.revokedAt).length} active`}
+      >
+        {newToken && (
+          <div className="remote-new-token">
+            <strong>Copy this key now</strong>
+            <code>{newToken}</code>
+            <span>It is shown once and cannot be recovered later.</span>
+            <button className="btn-primary" type="button" onClick={copyToken}>Copy key</button>
+            <button className="btn-ghost" type="button" onClick={() => setNewToken(null)}>I saved it</button>
+          </div>
+        )}
+        <div className="settings-field">
+          <label>Device name</label>
+          <input type="text" placeholder="My phone" value={deviceName} onChange={(event) => setDeviceName(event.target.value)} />
+        </div>
+        <div className="settings-field">
+          <label>Allowed domains</label>
+          <div className="remote-domain-list">
+            {domains.map((domain) => (
+              <label key={domain.id}>
+                <input type="checkbox" checked={selectedDomainIds.includes(domain.id)} onChange={() => toggleDomain(domain.id)} />
+                <span>{domain.path}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        <button className="btn-primary remote-full-button" type="button" onClick={createKey} disabled={saving || domains.length === 0}>Create device key</button>
+        <div className="remote-key-list">
+          {keys.length === 0 ? <p className="empty-state">No device keys yet.</p> : keys.map((key) => (
+            <article className={key.revokedAt ? "revoked" : ""} key={key.id}>
+              <div><strong>{key.name}</strong><code>{key.tokenPrefix}…</code></div>
+              <small>{key.domainIds.length} domain(s) · {key.lastUsedAt ? `last used ${new Date(key.lastUsedAt).toLocaleString()}` : "never used"}</small>
+              {key.revokedAt ? <span>Revoked</span> : <button className="btn-danger" type="button" onClick={() => revokeKey(key)}>Revoke</button>}
+            </article>
+          ))}
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        id="remote-connect"
+        title="Connect a device"
+        description="HTTPS endpoint and client trust"
+      >
+        <p className="panel-intro">Use an OpenAI-compatible client with this base URL:</p>
+        <code className="remote-api-url">{status?.apiBaseUrl}</code>
+        <div className="remote-connect-actions">
+          <button className="btn-ghost" type="button" onClick={copyApiUrl}>Copy base URL</button>
+          <button className="btn-ghost" type="button" onClick={testConnection}>Test gateway</button>
+        </div>
+        {connectionResult && <p className="remote-note">{connectionResult}</p>}
+        <p className="settings-hint">Choose a model named <code>domain/&lt;domain-id&gt;</code>. The model list only shows domains approved for that device key.</p>
+        {status?.certificateAvailable ? (
+          <button className="btn-ghost remote-full-button" type="button" onClick={downloadCertificate}>Download HTTPS trust certificate</button>
+        ) : (
+          <p className="remote-warning">The HTTPS certificate becomes available after the gateway starts once.</p>
+        )}
+        {status?.mode === "private_vpn" && <p className="remote-note">A Tailscale account is required. Install the official Tailscale app on this computer and the remote device, sign both into the same private tailnet, and use this computer&apos;s Tailscale DNS name. Model inference remains on this host; no router port forwarding is needed.</p>}
+      </PanelSection>
+    </>
   );
 }
 

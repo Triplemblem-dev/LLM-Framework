@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.models import Document, DocumentChunk
-from app.ollama_client import chat_structured, list_installed_models
+from app.runtime_client import chat_structured, list_installed_models
 
 MAX_DOCUMENTS = 50
 MAX_EXCERPT_CHARACTERS = 420

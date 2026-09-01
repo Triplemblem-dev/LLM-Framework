@@ -1,0 +1,20 @@
+{
+	auto_https disable_redirects
+}
+
+{$REMOTE_GATEWAY_HOSTNAME:localhost}:443 {
+	tls internal
+
+	@allowed path /v1/* /health
+	handle @allowed {
+		reverse_proxy backend:8000 {
+			header_up X-LLMF-Gateway-Secret {$REMOTE_GATEWAY_SHARED_SECRET}
+			header_up X-LLMF-Client-IP {http.request.remote.host}
+			flush_interval -1
+		}
+	}
+
+	handle {
+		respond "Not found" 404
+	}
+}

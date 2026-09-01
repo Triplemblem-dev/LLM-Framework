@@ -30,7 +30,11 @@ vulnerability itself.
 
 - Keep `.env` and its backups private and out of version control.
 - Do not publish ports 3000 or 8000 directly to the internet.
-- Use a private network or properly reviewed reverse proxy before remote access.
+- Leave Remote Access in Off mode unless the optional HTTPS gateway has been
+  deliberately configured. Never expose the gateway through router port
+  forwarding or UPnP.
+- Use a separate revocable device key for each remote client; never give a
+  remote client the internal `APP_ACCESS_TOKEN`.
 - Do not mount the Docker socket into backend or frontend containers.
 - Treat uploaded documents, repositories, and retrieved content as untrusted.
 - Back up database and storage volumes before upgrades or destructive changes.

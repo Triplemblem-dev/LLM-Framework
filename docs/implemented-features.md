@@ -111,6 +111,22 @@ and are not presented as interchangeable.
   including a production-input integrity manifest. See
   [Local Setup Launcher](./setup-launcher.md).
 
+## Secure remote API implementation preview
+
+An optional Caddy HTTPS gateway and OpenAI-compatible `/v1` API are implemented
+behind an Off-by-default backend mode. Remote devices use separate hash-stored,
+revocable, domain-scoped keys; remote chat is stateless and retains framework
+prompt, retrieval, memory, and per-domain tuning boundaries. A right-rail panel
+shows mode and gateway state, manages keys, exposes the API address, downloads
+the local CA certificate, and runs a safe gateway check.
+
+Ollama keeps its native internal adapter. A second adapter supports models
+served by a configured local OpenAI-compatible llama.cpp, LocalAI, or vLLM
+endpoint and rejects public endpoints by default. See
+[Secure remote API](./secure-remote-api.md) for the verified boundary and
+remaining release checks. This preview is intentionally not advertised in the
+main README until cross-platform LAN and Tailscale acceptance testing passes.
+
 ## Security properties verified in the repository
 
 - Cross-domain and sibling isolation, explicit parent/child inheritance,
@@ -128,9 +144,9 @@ and are not presented as interchangeable.
 ## Verification boundary
 
 The repository contains backend isolation, retrieval, deletion, prompt-layer,
-optimizer, and launcher tests plus a frontend production build and a Compose
-configuration check. Some integration tests require real PostgreSQL/pgvector
-and Ollama services. Public launcher artifacts are not yet signed or notarized;
+optimizer, remote-API/runtime-adapter, and launcher tests plus a frontend
+production build and Compose configuration checks. Some integration tests
+require real PostgreSQL/pgvector and Ollama services. Public launcher artifacts are not yet signed or notarized;
 clean-machine package installation and operating-system acceptance are manual
 release checks. The project is not presented as hardened for multi-user or
 public-internet deployment.

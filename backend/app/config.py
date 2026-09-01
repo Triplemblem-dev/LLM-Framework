@@ -21,6 +21,20 @@ class Settings(BaseSettings):
     repository_result_limit: int = 8
     repository_character_limit: int = 12_000
     optimizer_context_ceiling: int = Field(default=65_536, ge=512, le=262_144)
+    remote_gateway_shared_secret: str = ""
+    remote_gateway_public_url: str = "https://localhost:8443"
+    remote_gateway_bind_address: str = "127.0.0.1"
+    remote_gateway_hostname: str = "localhost"
+    remote_gateway_ca_path: str = "/gateway-data/caddy/pki/authorities/local/root.crt"
+    remote_api_default_rate_limit: int = Field(default=30, ge=1, le=600)
+    remote_api_max_input_characters: int = Field(default=100_000, ge=1_000, le=1_000_000)
+    remote_api_max_body_bytes: int = Field(default=1_000_000, ge=10_000, le=20_000_000)
+    remote_api_max_concurrent_generations: int = Field(default=1, ge=1, le=16)
+    remote_api_failed_auth_limit: int = Field(default=10, ge=1, le=120)
+    local_openai_base_url: str = ""
+    local_openai_api_key: str = ""
+    local_openai_provider_name: str = "Local OpenAI-compatible runtime"
+    allow_public_model_endpoints: bool = False
     cors_origins: str = "http://localhost:3000"
     """Comma-separated allowed origins for the frontend. Configurable rather than
     hardcoded so a downloaded copy of this framework works from whatever host/port

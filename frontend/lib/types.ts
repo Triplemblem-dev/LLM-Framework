@@ -563,7 +563,49 @@ export interface OptimizerContextChangeResult {
   audit: OptimizerContextAudit;
 }
 
-export type RightMode = "inspector" | "documents" | "memory" | "optimizer" | "settings";
+export type RemoteAccessMode = "off" | "local_network" | "private_vpn";
+
+export interface RemoteAccessStatus {
+  mode: RemoteAccessMode;
+  gatewayPort: number;
+  gatewayConfigured: boolean;
+  gatewayRunning: boolean;
+  apiBaseUrl: string;
+  bindAddress: string;
+  hostname: string;
+  networkConfigurationValid: boolean;
+  networkConfigurationError: string | null;
+  tailscaleConfigured: boolean;
+  certificateAvailable: boolean;
+  activeKeyCount: number;
+}
+
+export interface RemoteConnectionTest {
+  ready: boolean;
+  mode: RemoteAccessMode;
+  gatewayConfigured: boolean;
+  gatewayRunning: boolean;
+  networkConfigurationValid: boolean;
+  detail: string;
+}
+
+export interface RemoteApiKey {
+  id: string;
+  name: string;
+  tokenPrefix: string;
+  domainIds: string[];
+  requestsPerMinute: number;
+  expiresAt: string | null;
+  revokedAt: string | null;
+  lastUsedAt: string | null;
+  createdAt: string;
+}
+
+export interface RemoteApiKeyCreated extends RemoteApiKey {
+  token: string;
+}
+
+export type RightMode = "inspector" | "documents" | "memory" | "optimizer" | "remote" | "settings";
 
 export interface ToastItem {
   id: string;

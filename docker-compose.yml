@@ -1,8 +1,7 @@
 # Cross-platform base configuration for Linux, Windows (Docker Desktop/WSL2),
 # and macOS. It has no GPU requirement. Backend and frontend ports are
-# published directly to the host for a trusted local installation; this is not
-# a hardened public-internet reverse-proxy configuration. See README.md for
-# platform-specific notes.
+# published on loopback by default. Optional remote access uses the separate
+# HTTPS gateway profile and is never a public-internet reverse proxy.
 #
 # Requires a .env file next to this one - copy .env.example and fill it in.
 #
@@ -60,6 +59,20 @@ services:
       REPOSITORY_RESULT_LIMIT: ${REPOSITORY_RESULT_LIMIT:-8}
       REPOSITORY_CHARACTER_LIMIT: ${REPOSITORY_CHARACTER_LIMIT:-12000}
       OPTIMIZER_CONTEXT_CEILING: ${OPTIMIZER_CONTEXT_CEILING:-65536}
+      REMOTE_GATEWAY_SHARED_SECRET: ${REMOTE_GATEWAY_SHARED_SECRET:-}
+      REMOTE_GATEWAY_PUBLIC_URL: ${REMOTE_GATEWAY_PUBLIC_URL:-https://localhost:8443}
+      REMOTE_GATEWAY_BIND_ADDRESS: ${REMOTE_GATEWAY_BIND_ADDRESS:-127.0.0.1}
+      REMOTE_GATEWAY_HOSTNAME: ${REMOTE_GATEWAY_HOSTNAME:-localhost}
+      REMOTE_GATEWAY_CA_PATH: /gateway-data/caddy/pki/authorities/local/root.crt
+      REMOTE_API_DEFAULT_RATE_LIMIT: ${REMOTE_API_DEFAULT_RATE_LIMIT:-30}
+      REMOTE_API_MAX_INPUT_CHARACTERS: ${REMOTE_API_MAX_INPUT_CHARACTERS:-100000}
+      REMOTE_API_MAX_BODY_BYTES: ${REMOTE_API_MAX_BODY_BYTES:-1000000}
+      REMOTE_API_MAX_CONCURRENT_GENERATIONS: ${REMOTE_API_MAX_CONCURRENT_GENERATIONS:-1}
+      REMOTE_API_FAILED_AUTH_LIMIT: ${REMOTE_API_FAILED_AUTH_LIMIT:-10}
+      LOCAL_OPENAI_BASE_URL: ${LOCAL_OPENAI_BASE_URL:-}
+      LOCAL_OPENAI_API_KEY: ${LOCAL_OPENAI_API_KEY:-}
+      LOCAL_OPENAI_PROVIDER_NAME: ${LOCAL_OPENAI_PROVIDER_NAME:-Local OpenAI-compatible runtime}
+      ALLOW_PUBLIC_MODEL_ENDPOINTS: ${ALLOW_PUBLIC_MODEL_ENDPOINTS:-false}
     depends_on:
       postgres:
         condition: service_healthy
@@ -73,8 +86,12 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - backend_storage:/app/storage
+      - gateway_data:/gateway-data:ro
+    networks:
+      - default
+      - gateway_internal
     ports:
-      - "8000:8000"
+      - "${BACKEND_BIND_ADDRESS:-127.0.0.1}:8000:8000"
 
   frontend:
     build:
@@ -85,9 +102,39 @@ services:
     depends_on:
       - backend
     ports:
-      - "3000:3000"
+      - "${FRONTEND_BIND_ADDRESS:-127.0.0.1}:3000:3000"
+
+  # Starts only with: docker compose --profile remote up -d gateway
+  # The backend also requires the saved access mode to be enabled, so a
+  # leftover gateway container cannot silently turn remote access back on.
+  gateway:
+    image: caddy:2.10-alpine
+    profiles: ["remote"]
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      REMOTE_GATEWAY_HOSTNAME: ${REMOTE_GATEWAY_HOSTNAME:-localhost}
+      REMOTE_GATEWAY_SHARED_SECRET: ${REMOTE_GATEWAY_SHARED_SECRET:-}
+    volumes:
+      - ./gateway/Caddyfile:/etc/caddy/Caddyfile:ro
+      - gateway_data:/data
+      - gateway_config:/config
+    networks:
+      - gateway_internal
+    ports:
+      - "${REMOTE_GATEWAY_BIND_ADDRESS:-127.0.0.1}:${REMOTE_GATEWAY_PORT:-8443}:443"
 
 volumes:
   postgres_data:
   ollama_data:
   backend_storage:
+  gateway_data:
+  gateway_config:
+
+networks:
+  gateway_internal:
+    # A fully `internal: true` Docker network cannot publish the gateway port
+    # on Docker Desktop. Isolation instead comes from attaching only backend
+    # and gateway to this dedicated network; PostgreSQL and Ollama remain on
+    # the default network and Caddy has a fixed, non-arbitrary proxy target.

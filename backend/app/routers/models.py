@@ -5,18 +5,23 @@ from sqlalchemy.orm import Session
 from app.auth import require_auth
 from app.db import get_db
 from app.models import Model, ModelProfile
-from app.ollama_client import list_installed_models
+from app.runtime_client import list_installed_models, provider_capabilities
 from app.schemas import ModelInstalledOut, ModelProfileOut, ModelProfileSet
 
 router = APIRouter(prefix="/models", tags=["models"], dependencies=[Depends(require_auth)])
+
+
+@router.get("/providers")
+def providers():
+    return provider_capabilities()
 
 
 @router.get("/installed", response_model=list[ModelInstalledOut])
 def installed():
     try:
         raw = list_installed_models()
-    except httpx.HTTPError as exc:
-        raise HTTPException(status_code=502, detail=f"Could not reach Ollama: {exc}") from exc
+    except (httpx.HTTPError, ValueError) as exc:
+        raise HTTPException(status_code=502, detail=f"Could not reach a configured local model runtime: {exc}") from exc
     return [
         ModelInstalledOut(
             name=m["name"],
@@ -52,12 +57,12 @@ def get_active_profile(db: Session = Depends(get_db)):
 def set_active_profile(body: ModelProfileSet, db: Session = Depends(get_db)):
     try:
         installed_models = {m["model"]: m for m in list_installed_models()}
-    except httpx.HTTPError as exc:
-        raise HTTPException(status_code=502, detail=f"Could not reach Ollama: {exc}") from exc
+    except (httpx.HTTPError, ValueError) as exc:
+        raise HTTPException(status_code=502, detail=f"Could not reach a configured local model runtime: {exc}") from exc
 
     info = installed_models.get(body.ollama_tag)
     if info is None:
-        raise HTTPException(status_code=400, detail=f"'{body.ollama_tag}' is not installed in Ollama")
+        raise HTTPException(status_code=400, detail=f"'{body.ollama_tag}' is not available from a configured local runtime")
 
     model = db.query(Model).filter_by(ollama_tag=body.ollama_tag).one_or_none()
     if model is None:

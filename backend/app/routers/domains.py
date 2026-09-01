@@ -14,7 +14,7 @@ from app.db import get_db
 from app.deps import get_current_user
 from app.domain_model_settings import effective_model_settings
 from app.models import Conversation, Domain, Model, ModelProfile
-from app.ollama_client import list_installed_models
+from app.runtime_client import list_installed_models
 from app.optimizer.discovery import discover_capabilities
 from app.prompt_assembly import ADVANCED_LAYER_KEYS, OWNER_CONTROLLED_LAYER_KEYS, assemble, log_scope_access
 from app.schemas import (

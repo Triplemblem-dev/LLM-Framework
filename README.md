@@ -224,64 +224,23 @@ If you'd rather run things directly instead of in Docker:
 
 ## Model performance optimizer
 
-The local **Model Performance Optimizer** is available from the performance-gauge
-tab in the right rail. Select an installed model to inspect the configured
-Ollama connection, container/native/remote relationship, model metadata,
-loaded context, runtime hardware, sensors, and evidence gaps. The processor-use
-graphic makes CPU-only, GPU/accelerator-only, split, and not-yet-observed model
-placement explicit. An unreachable Ollama endpoint produces an actionable
-diagnostic report.
+Open **Model Performance Optimizer** from the performance-gauge tab in the
+right rail. Its first section, **Quick model tuning**, makes it easy to
+fine-tune how the model responds in each domain or sub-domain. Change the model,
+request context, maximum answer length, response style, and temperature with
+simple controls; each scope remembers its own settings, and no benchmark is
+required.
 
-Reports and benchmarks in this panel are optional advanced measurement. Its
-first section, **Quick model tuning**, lets ordinary users change per-domain
-model, context, answer length, response style, and temperature without running
-a benchmark. **Ollama loaded allocation** describes the
-currently loaded runtime; it is not automatically the selected domain's
-request context.
+The advanced section can inspect the Ollama connection, model metadata,
+hardware, loaded context, and CPU/GPU placement. Optional context comparisons
+use only built-in synthetic prompts and keep private conversations, documents,
+memories, and repositories out of benchmark input. Recommendations are never
+applied automatically: users review and confirm a setting change, and safe
+rollback is available when no newer setting would be overwritten.
 
-It provides a persistent baseline benchmark and a bounded **context
-comparison**. Choose a goal and Quick or Standard mode, review up to four
-context candidates clamped to the model's native limit and the framework safety
-ceiling, and then start it. The background run survives page navigation,
-exposes reconnectable progress, can be cancelled safely, and keeps complete or
-partial results in local PostgreSQL.
-It uses only built-in synthetic prompts and discards generated answers; private
-conversations, documents, memories, and repositories are not benchmark input.
-The run may temporarily use substantial CPU/GPU/memory and pauses known chat or
-indexing work, but it does not unload unrelated models, restart Ollama, change
-saved settings, overclock hardware, expose shell access to a model, or send
-hardware/results to a cloud service.
-
-The completed comparison reports separate latency, generation, memory, context,
-power, reliability, and CPU/GPU-placement evidence. It shows Pareto tradeoffs,
-visible versioned objective weights, confidence and its reasons, deltas from the
-current context, failed/skipped candidates, and a plain-language recommendation.
-Larger context does not win merely for being larger when the workload does not
-need it. The user can explicitly keep the current settings or download a
-redacted Markdown report. Confidence scoring v2 repeats each of the three
-synthetic workloads twice in Quick mode or three times in Standard mode and
-calculates variance only within matching workloads.
-
-The **Review setting change** step shows the exact current → selected profile
-context alongside the
-optimizer recommendation, explains that
-the framework sends this value to Ollama as `num_ctx` on each model request,
-and rechecks the profile, model build, Ollama endpoint/version, hardware
-evidence, native model limit, and safety ceiling. It applies only after warning
-acknowledgement and exact confirmation. Apply is owner-authenticated,
-compare-and-set protected, transactionally verified, and recorded in an
-append-only local audit. One-click rollback is offered only while the profile
-still has the applied value, so it cannot overwrite a newer change. No Ollama
-restart is required. The ordinary model-switch endpoint cannot change context
-and therefore cannot bypass this workflow. The main-model card distinguishes
-the effective active profile context from the native maximum shown in the picker.
-The recommendation is a default rather than a restriction: the user can enter
-the winning value, another completed measured candidate, or a custom token
-count. The preview labels that choice explicitly. An unmeasured custom value
-adds a required performance/placement warning and remains bounded by the
-framework ceiling and current model-native limit.
-Historical reports are flagged when the currently inspected model, Ollama
-version, runtime, or visible accelerators no longer match their captured evidence.
+The interface also distinguishes a domain's request context from Ollama's
+loaded allocation and the model's native limit, so users can tune performance
+without confusing those values.
 
 The implemented optimizer behavior and its present verification boundary are
 summarized in the

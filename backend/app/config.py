@@ -5,7 +5,15 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    database_url: str
+    # Docker passes PostgreSQL components separately so passwords never need to
+    # be interpolated into a URL. DATABASE_URL remains available for native
+    # development and other deliberate overrides.
+    database_url: str | None = None
+    postgres_user: str = "llmframework"
+    postgres_password: str | None = Field(default=None, repr=False)
+    postgres_db: str = "llmframework"
+    postgres_host: str = "localhost"
+    postgres_port: int = Field(default=5432, ge=1, le=65535)
     app_access_token: str
     ollama_host: str = "http://localhost:11434"
     embedding_model: str = "nomic-embed-text"

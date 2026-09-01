@@ -31,7 +31,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     <div className="login-screen">
       <div className="login-card">
         <h1>LLM Framework</h1>
-        <div className="sub">Paste the APP_ACCESS_TOKEN from backend/.env to connect.</div>
+        <div className="sub">
+          Paste the APP_ACCESS_TOKEN from the .env file beside docker-compose.yml.
+        </div>
         <form
           onSubmit={(e) => {
             e.preventDefault();

@@ -3,10 +3,11 @@
 layers). Safe to run repeatedly - each seed is skipped if it already exists.
 """
 
+import sys
 from datetime import datetime, timedelta
 
 from sqlalchemy import text
-from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import Session
 
 from app.db import Base, SessionLocal, engine
@@ -482,12 +483,33 @@ def ensure_schema_upgrades() -> None:
         )
 
 
+def database_startup_guidance(error: BaseException) -> str | None:
+    """Return safe, actionable help for a rejected PostgreSQL credential."""
+    if "password authentication failed" not in str(error).lower():
+        return None
+    return (
+        "PostgreSQL rejected the configured database password. Changing "
+        "POSTGRES_PASSWORD in .env does not change the password already stored "
+        "in an initialized postgres_data volume. Restore the previous value, "
+        "rotate the PostgreSQL role password, or reset the volumes if their data "
+        "is disposable. Recreating only the backend cannot repair this mismatch. "
+        "See docs/database-passwords.md."
+    )
+
+
 def main() -> None:
-    ensure_vector_extension()
-    Base.metadata.create_all(bind=engine)
-    ensure_schema_upgrades()
-    with SessionLocal() as db:
-        seed(db)
+    try:
+        ensure_vector_extension()
+        Base.metadata.create_all(bind=engine)
+        ensure_schema_upgrades()
+        with SessionLocal() as db:
+            seed(db)
+    except OperationalError as exc:
+        guidance = database_startup_guidance(exc)
+        if guidance is None:
+            raise
+        print(guidance, file=sys.stderr)
+        raise SystemExit(1) from None
     print("Database bootstrapped and seeded.")
 
 

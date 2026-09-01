@@ -43,7 +43,14 @@ services:
     build: ./backend
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-llmframework}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-llmframework}
+      # Keep credentials as separate values. The backend constructs a
+      # structured SQLAlchemy URL so reserved password characters are not
+      # mistaken for URL syntax.
+      POSTGRES_USER: ${POSTGRES_USER:-llmframework}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env - see .env.example}
+      POSTGRES_DB: ${POSTGRES_DB:-llmframework}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
       APP_ACCESS_TOKEN: ${APP_ACCESS_TOKEN:?set APP_ACCESS_TOKEN in .env - see .env.example}
       # Override in .env to point at a native Ollama install instead of the
       # bundled container, e.g. http://host.docker.internal:11434 (Mac/

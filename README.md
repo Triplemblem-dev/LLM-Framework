@@ -118,9 +118,10 @@ POSTGRES_PASSWORD=
 APP_ACCESS_TOKEN=
 ```
 
-Give each one a different random value of at least 32 characters. A password
-manager is the easiest safe generator. Do not add quotes or spaces around the
-values. Save the file.
+Give each one a different random value of at least 32 letters and numbers. A
+password manager is the easiest safe generator. On macOS or Linux,
+`openssl rand -hex 32` creates a portable 64-character value. Do not add quotes
+or spaces around the values. Save the file.
 
 - `POSTGRES_PASSWORD` protects the framework database.
 - `APP_ACCESS_TOKEN` is the password you paste into the framework login screen.
@@ -131,13 +132,15 @@ You can change it later too: edit only `APP_ACCESS_TOKEN` in `.env`, save it,
 then run:
 
 ```bash
-docker compose up -d --no-deps --force-recreate backend
+docker compose up -d --build backend frontend
 ```
 
 Reload the browser and sign in with the new token. Do not change
 `POSTGRES_PASSWORD` after the database has been initialized unless you also
 rotate the password inside PostgreSQL; changing only the `.env` line would
-disconnect the backend from the existing database.
+disconnect the backend from the existing database. Follow the
+[database-password guide](./docs/database-passwords.md) to preserve the data or
+perform an explicitly destructive fresh reset.
 
 ### 5. Start the database and local model service
 
@@ -179,6 +182,10 @@ If a service is not running, inspect the latest logs:
 ```bash
 docker compose logs --tail=100 postgres ollama backend frontend
 ```
+
+If the backend reports `password authentication failed`, do not keep recreating
+only the backend. Follow the [database-password guide](./docs/database-passwords.md)
+to repair the PostgreSQL credential mismatch.
 
 GitHub also has a [cloning guide](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
 if you need more help with Git on Windows, macOS, or Linux.

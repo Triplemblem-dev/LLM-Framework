@@ -20,6 +20,7 @@ inventory.
 - [AI document organizer](./document-organizer.md)
 - [PDF to Markdown](./pdf-to-markdown.md)
 - [Secure remote API implementation preview](./secure-remote-api.md)
+- [Database passwords and recovery](./database-passwords.md)
 
 These records describe public behavior from the code and tests that currently
 implement it.

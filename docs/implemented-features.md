@@ -101,6 +101,10 @@ and are not presented as interchangeable.
   (or deletes every domain), later container restarts preserve that choice.
 - Docker Compose services for PostgreSQL/pgvector, backend, frontend, and an
   optional bundled Ollama service.
+- PostgreSQL credentials are passed as separate fields and assembled with a
+  structured SQLAlchemy URL, preserving reserved password characters. Backend
+  startup reports initialized-volume password mismatches with recovery guidance;
+  see [Database passwords and recovery](./database-passwords.md).
 - Native, bundled, and remote Ollama connection modes.
 - A standalone Tk graphical setup launcher for Windows, macOS, and Linux that
   performs preflight checks, offers explicit prerequisite installation paths,

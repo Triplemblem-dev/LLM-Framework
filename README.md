@@ -183,6 +183,20 @@ docker compose logs --tail=100 postgres ollama backend frontend
 GitHub also has a [cloning guide](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
 if you need more help with Git on Windows, macOS, or Linux.
 
+### Update the framework
+
+From the folder that contains your cloned repository, run:
+
+```bash
+cd LLM-Framework
+git pull --ff-only
+docker compose up -d --build
+```
+
+This keeps your `.env`, database, documents, and downloaded Docker Ollama
+models. Do not add `-v` to an update command because it deletes the stored
+Docker volumes.
+
 ### Tune a domain without running benchmarks
 
 Select a domain or sub-domain, open **Settings**, and expand **Domain model

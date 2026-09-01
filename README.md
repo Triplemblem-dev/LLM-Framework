@@ -52,7 +52,6 @@ Open a terminal in the parent folder where you want to keep the project. For
 example, if you created a folder named `Testing`:
 
 ```bash
-cd ~/Testing
 git clone https://github.com/Triplemblem-dev/LLM-Framework.git
 cd LLM-Framework
 ```
@@ -77,11 +76,6 @@ Get-ChildItem -Force .env.example,docker-compose.yml
 ```
 
 Both `.env.example` and `docker-compose.yml` must be listed before continuing.
-
-> If you see `cp: .env.example: No such file or directory`, you are in the
-> parent folder, not the cloned repository. For example, a prompt ending in
-> `Testing %` means you still need to run `cd LLM-Framework`. Then run the copy
-> command again.
 
 ### 3. Create the private `.env` file
 

@@ -1,55 +1,65 @@
 # Download and install
 
-Packaged releases are intended for people who do not use Git or the command
-line. A release ZIP contains the application source required by Docker and the
-matching graphical setup launcher in one folder.
+## Current recommended method: clone from GitHub
 
-## Download from GitHub
+The current supported path is:
 
-1. Open the LLM Framework repository page in a web browser.
-2. Find **Releases** on the right side of the page. On a narrow screen, open the
-   repository's **Releases** section from the page navigation.
-3. Select the release labelled **Latest**.
-4. Under **Assets**, select exactly one download:
+```bash
+git clone https://github.com/Triplemblem-dev/LLM-Framework.git
+cd LLM-Framework
+```
 
-   | Computer | Download |
-   | --- | --- |
-   | Windows 10/11, 64-bit | `LLM-Framework-Windows-x64.zip` |
-   | Intel or Apple-silicon Mac | `LLM-Framework-macOS-Universal.zip` |
-   | 64-bit Linux | `LLM-Framework-Linux-x64.zip` |
+Then follow the six numbered steps in the main [Quick start](../README.md#quick-start).
+Those steps install prerequisites, locate the private `.env`, start Docker
+services, download models, and select the active framework model.
 
-5. Wait for the ZIP to finish downloading, then extract the entire archive.
-   Do not run the launcher from inside the ZIP preview.
+The most common setup mistake is running commands from the parent folder. If
+the terminal prompt says `Testing %`, but the repository was cloned as
+`Testing/LLM-Framework`, run:
 
-The green **Code → Download ZIP** button downloads source code, not the
-packaged launcher. It is useful for developers but is not the recommended
-installation route.
+```bash
+cd LLM-Framework
+```
 
-## Start the graphical setup
+You should be able to list both files below before copying the environment
+template:
 
-### Windows
+```bash
+ls -la .env.example docker-compose.yml
+```
 
-Open the extracted folder and double-click `LLM-Framework-Setup.exe`.
+## Download ZIP without learning Git
 
-### macOS
+Someone who does not want to use Git can still download the source:
 
-Open the extracted folder and double-click `LLM-Framework-Setup.app`.
+1. Open the repository on GitHub.
+2. Select the green **Code** button.
+3. Select **Download ZIP**.
+4. Extract the entire ZIP to a permanent folder.
+5. Open a terminal inside the extracted folder—the folder that directly
+   contains `.env.example` and `docker-compose.yml`.
+6. Continue at [Create the private `.env` file](../README.md#3-create-the-private-env-file).
 
-### Linux
+The extracted directory may be named `LLM-Framework-main` rather than
+`LLM-Framework`; the name does not matter. The two files above identify the
+correct folder.
 
-Open the extracted folder and launch `LLM-Framework-Setup`. Desktop
-environments differ; some require opening file **Properties → Permissions**
-and enabling **Allow executing file as program** first.
+## Packaged graphical releases
 
-The launcher checks Docker, Docker Compose, Ollama, available ports, disk
-space, and existing configuration. It offers supported installation actions or
-opens the official platform instructions, then guides the user through model
-selection and verifies the running framework.
+The repository contains a graphical setup-launcher implementation and a
+cross-platform release workflow, but a **Releases** page is useful only after
+the maintainer has published a version tag and its builds have completed. If
+GitHub shows no release assets, nothing is missing from your browser: use Git
+clone or **Code → Download ZIP** instead.
+
+Future packaged assets are designed to contain the application source required
+by Docker plus the matching platform launcher in one extracted folder. They
+must not be run from inside a ZIP preview.
 
 ## Current trust and compatibility boundary
 
-The automated release workflow publishes a `SHA256SUMS.txt` file so downloads
-can be verified. The current CI artifacts are not code-signed or notarized.
+The release workflow is designed to publish a `SHA256SUMS.txt` file so downloads
+can be verified. Current launcher artifacts are not code-signed or notarized.
 Windows SmartScreen or macOS Gatekeeper may therefore warn or block them even
 when the download is intact. General non-technical distribution should begin
 only after the maintainer adds Authenticode signing for Windows and Apple

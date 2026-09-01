@@ -256,8 +256,15 @@ artifacts remain unsigned until maintainer-owned signing and notarization are
 configured.
 
 Runtime data lives in Docker volumes and the ignored local `.env`, not in Git.
-Moving or recloning the source repository does not automatically move the
-database, documents, or Ollama models.
+For a normal Git clone, that file is `<cloned LLM-Framework folder>/.env`, next
+to `docker-compose.yml`. It is created from `.env.example` only after entering
+the cloned folder. `APP_ACCESS_TOKEN` in that file is the framework login
+password and should be replaced with a unique random value. After changing it,
+`docker compose up -d --no-deps --force-recreate backend` applies the new token;
+the browser must then sign in again. Changing `POSTGRES_PASSWORD` after first
+database initialization requires a real PostgreSQL password rotation, not only
+an `.env` edit. Moving or recloning the source repository does not
+automatically move the database, documents, or Ollama models.
 
 ## Repository layout
 

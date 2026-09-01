@@ -18,70 +18,74 @@ code-repository search, memory, scoped tool permissions, isolation testing) is b
 `docs/` for current implementation and verification records. Not yet hardened for multi-user
 or public-internet deployment.
 
-## Quick start (Git clone + Docker Compose)
+## Quick start
 
-The supported installation path is to clone this GitHub repository and run the
-framework with Docker Compose. Complete every prerequisite below before
-starting the framework.
+The main installation method is GitHub cloning plus Docker Compose. Docker runs
+PostgreSQL, Ollama, the backend, and the frontend for you; you do not need to
+install PostgreSQL, Python, Node.js, or Ollama separately for this default path.
 
-### 1. Install Git and clone the repository
+### 1. Install Git and Docker
 
-Install [Git](https://git-scm.com/downloads/) for the computer, then verify it:
+Install [Git](https://git-scm.com/downloads/) and Docker for your operating
+system:
+
+- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
+- [Docker Desktop for macOS](https://docs.docker.com/desktop/setup/install/mac-install/)
+- [Docker Engine for Linux](https://docs.docker.com/engine/install/) plus the
+  [Docker Compose plugin](https://docs.docker.com/compose/install/linux/)
+
+Start Docker Desktop or the Docker service, then check that everything is
+ready:
 
 ```bash
 git --version
-```
-
-Choose where the project should live, open a terminal there, and run:
-
-```bash
-git clone https://github.com/Triplemblem-dev/LLM-Framework.git
-cd LLM-Framework
-```
-
-GitHub also provides a [step-by-step cloning
-guide](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
-for Windows, macOS, and Linux.
-
-### 2. Install and start Docker
-
-- **Windows:** install [Docker Desktop for
-  Windows](https://docs.docker.com/desktop/setup/install/windows-install/).
-  Docker Desktop will guide you through its WSL 2 requirement.
-- **macOS:** install [Docker Desktop for
-  Mac](https://docs.docker.com/desktop/setup/install/mac-install/).
-- **Linux:** install [Docker Engine](https://docs.docker.com/engine/install/)
-  and the [Docker Compose
-  plugin](https://docs.docker.com/compose/install/linux/).
-
-Start Docker Desktop or the Docker service, then verify all three commands:
-
-```bash
 docker --version
 docker compose version
 docker info
 ```
 
-If `docker info` fails, Docker is installed but its service is not running yet.
-Resolve that before continuing.
+If `docker info` fails, Docker is installed but not running yet.
 
-### 3. Understand the database and model prerequisites
+### 2. Clone the project and enter its folder
 
-The default manual commands below run **PostgreSQL with pgvector** and
-**Ollama** in Docker containers. Docker downloads those images automatically;
-you do not need to install PostgreSQL or Ollama separately on the computer.
-Allow at least 20 GiB of free disk space and keep an internet connection active
-for the first image and model downloads.
+Open a terminal in the parent folder where you want to keep the project. For
+example, if you created a folder named `Testing`:
 
-Native Ollama is optional and is mainly useful for direct GPU/Metal access.
-If you choose that arrangement, install it from the [official Ollama download
-page](https://ollama.com/download), start it, verify `ollama --version`, and use
-the native instructions in [GPU acceleration](#gpu-acceleration).
+```bash
+cd ~/Testing
+git clone https://github.com/Triplemblem-dev/LLM-Framework.git
+cd LLM-Framework
+```
 
-### 4. Configure the framework
+On Windows PowerShell, the same clone commands work; use the appropriate path
+for your parent folder, for example `cd $HOME\Testing`.
 
-From the cloned `LLM-Framework` folder, create the local configuration file
-with the command for your platform:
+Now verify that the terminal is inside the repository:
+
+macOS or Linux:
+
+```bash
+pwd
+ls -la .env.example docker-compose.yml
+```
+
+Windows PowerShell:
+
+```powershell
+Get-Location
+Get-ChildItem -Force .env.example,docker-compose.yml
+```
+
+Both `.env.example` and `docker-compose.yml` must be listed before continuing.
+
+> If you see `cp: .env.example: No such file or directory`, you are in the
+> parent folder, not the cloned repository. For example, a prompt ending in
+> `Testing %` means you still need to run `cd LLM-Framework`. Then run the copy
+> command again.
+
+### 3. Create the private `.env` file
+
+Run exactly one command from inside the cloned `LLM-Framework` folder.
 
 macOS or Linux:
 
@@ -95,38 +99,95 @@ Windows PowerShell:
 Copy-Item .env.example .env
 ```
 
-Open `.env` in a text editor. Fill in the blank `POSTGRES_PASSWORD` and
-`APP_ACCESS_TOKEN` values with two different random values of at least 32
-letters and numbers each. A password manager can generate them. Do not commit
-or share this file.
+The new file is located here:
 
-### 5. Start PostgreSQL and Ollama
+```text
+<the cloned LLM-Framework folder>/.env
+```
+
+Examples:
+
+- macOS: `/Users/your-name/Testing/LLM-Framework/.env`
+- Linux: `/home/your-name/Testing/LLM-Framework/.env`
+- Windows: `C:\Users\your-name\Testing\LLM-Framework\.env`
+
+Files beginning with a dot are hidden by default on macOS and Linux. You can
+still open `.env` from a text editor. On macOS Finder, press
+<kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> to show hidden files.
+
+### 4. Set your two private values
+
+Open `.env` and find these lines:
+
+```dotenv
+POSTGRES_PASSWORD=
+APP_ACCESS_TOKEN=
+```
+
+Give each one a different random value of at least 32 characters. A password
+manager is the easiest safe generator. Do not add quotes or spaces around the
+values. Save the file.
+
+- `POSTGRES_PASSWORD` protects the framework database.
+- `APP_ACCESS_TOKEN` is the password you paste into the framework login screen.
+- `.env` is ignored by Git and must never be committed, posted, or shared.
+
+Choosing your own strong `APP_ACCESS_TOKEN` during installation is encouraged.
+You can change it later too: edit only `APP_ACCESS_TOKEN` in `.env`, save it,
+then run:
+
+```bash
+docker compose up -d --no-deps --force-recreate backend
+```
+
+Reload the browser and sign in with the new token. Do not change
+`POSTGRES_PASSWORD` after the database has been initialized unless you also
+rotate the password inside PostgreSQL; changing only the `.env` line would
+disconnect the backend from the existing database.
+
+### 5. Start the database and local model service
+
+Allow at least 20 GiB of free disk space and keep an internet connection active
+for the first image and model downloads.
 
 ```bash
 docker compose up -d postgres ollama
-docker compose exec ollama ollama pull qwen2.5-coder:7b     # or any model you prefer
-docker compose exec ollama ollama pull nomic-embed-text     # required for document and repository search
-docker compose ps
 ```
 
-The `postgres` service should report healthy and the `ollama` service should be
-running. If either service stops, inspect it with
-`docker compose logs --tail=100 postgres ollama`.
+Download one chat model:
 
-### 6. Start the framework
+```bash
+docker compose exec ollama ollama pull qwen2.5-coder:7b
+```
+
+Download the embedding model required for document and repository search:
+
+```bash
+docker compose exec ollama ollama pull nomic-embed-text
+```
+
+### 6. Build and open the framework
 
 ```bash
 docker compose up -d --build backend frontend
+docker compose ps
 ```
 
-Open `http://localhost:3000` and paste your `APP_ACCESS_TOKEN` at the
-login prompt. Before selecting a domain, open **Framework model** in the left rail and select the installed
-model you want to use. The framework saves it as the active model profile.
+In `docker compose ps`, `postgres`, `ollama`, `backend`, and `frontend` should
+be running. Open [http://localhost:3000](http://localhost:3000) and paste the
+`APP_ACCESS_TOKEN` from your `.env` file.
 
-Use the sun/moon switch in the top bar to change between the high-contrast
-light and dark themes. The choice is saved only in that browser on the current
-device. On a first visit, the interface follows the device's preferred color
-scheme.
+Before selecting a domain, open **Framework model** in the left rail and select
+the model you downloaded. The framework remembers it as the active model.
+
+If a service is not running, inspect the latest logs:
+
+```bash
+docker compose logs --tail=100 postgres ollama backend frontend
+```
+
+GitHub also has a [cloning guide](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
+if you need more help with Git on Windows, macOS, or Linux.
 
 ### Tune a domain without running benchmarks
 

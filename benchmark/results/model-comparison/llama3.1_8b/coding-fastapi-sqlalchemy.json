@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b",
+  "prompt_id": "coding-fastapi-sqlalchemy",
+  "category": "coding",
+  "timestamp": "2026-08-06T18:07:33.085233+00:00",
+  "request": {
+    "system": null,
+    "user": "Write a FastAPI endpoint `POST /domains/{domain_id}/subdomains` that creates a sub-domain using SQLAlchemy (async session), enforces that the parent domain has no parent itself (two-level nesting only), and returns a 400 with a clear error if violated. Just the code.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "```python\nfrom fastapi import Depends, HTTPException\nfrom sqlalchemy.ext.asyncio import AsyncSession\nfrom pydantic import BaseModel\n\n# Assuming you have defined these models already\nclass Domain(BaseModel):\n    id: int\n    name: str\n    parent_id: int | None = None\n\nasync def get_db():\n    db = session_local()\n    try:\n        yield db\n    finally:\n        await db.close()\n\n@router.post(\"/domains/{domain_id}/subdomains\")\nasync def create_subdomain(domain_id: int, new_subdomain: Domain, db: AsyncSession = Depends(get_db)):\n    parent_domain = await db.get(Domain, domain_id)\n    \n    if parent_domain.parent_id is not None:\n        raise HTTPException(status_code=400, detail=\"Two-level nesting only\")\n        \n    new_subdomain.parent_id = domain_id\n    db.add(new_subdomain)\n    try:\n        await db.commit()\n    except Exception as e:\n        await db.rollback()\n        raise HTTPException(status_code=500, detail=str(e))\n    \n    return new_subdomain\n```",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 5.969092190999618,
+    "time_to_first_token_s": 0.34253575500042643,
+    "total_duration_s": 5.960853141,
+    "load_duration_s": 0.257712594,
+    "prompt_eval_count": 69,
+    "prompt_eval_duration_s": 0.068423,
+    "eval_count": 224,
+    "eval_duration_s": 5.62653,
+    "tokens_per_second": 39.811393523183916
+  },
+  "resource": {
+    "samples": 15,
+    "vram_used_mb": {
+      "avg": 5278.0,
+      "peak": 5278.0
+    },
+    "gpu_util_pct": {
+      "avg": 90.73333333333333,
+      "peak": 95.0
+    },
+    "power_draw_w": {
+      "avg": 122.86666666666666,
+      "peak": 128.96
+    },
+    "temperature_c": {
+      "avg": 72.6,
+      "peak": 73.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5020141485,
+    "size_vram_bytes": 5020141485,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

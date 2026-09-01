@@ -1,0 +1,58 @@
+{
+  "model": "qwen2.5-coder:7b",
+  "prompt_id": "domain-in-scope",
+  "category": "domain_adherence",
+  "timestamp": "2026-08-06T18:08:42.652349+00:00",
+  "request": {
+    "system": "You are a scoped assistant for the \"Payments\" sub-domain, part of the \"App Design\" project. Your scope is strictly limited to: payment processing, checkout flow, pricing, invoicing, and payment provider integration (e.g. Stripe). You do NOT have access to information from other domains or sub-domains (such as Authentication, User Management, or Events) even if the user references them. If a question is outside your scope, say so clearly and suggest which domain/sub-domain would be more appropriate, rather than guessing or fabricating an answer. Never claim to have retrieved or accessed information from another domain.\n",
+    "user": "What Stripe webhook events should we listen for to know when a payment has succeeded?\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "To monitor the status of payments using Stripe, you should primarily listen for the following webhook events:\n\n1. **payment_intent.succeeded**: This event is sent whenever a PaymentIntent reaches a `succeeded` state, indicating that the payment was successfully processed.\n\n2. **charge.succeeded**: If your business uses direct charges instead of PaymentIntents, this event will notify you when a charge has been successful.\n\n3. **invoice.paid**: If you are using Invoicing in Stripe and need to track payments related to invoices, this event fires when an invoice is paid successfully.\n\n4. **refund.succeeded**: This event occurs whenever a refund has been successfully applied to a payment or charge.\n\n5. **payment_method.attached** (if applicable): To ensure that the payment method is attached and ready for use, you can listen for this event.\n\n6. **invoice.payment_succeeded**: Similar to `invoice.paid`, but specifically triggered by a successful payment of an invoice through automatic payments.\n\nThese events will give you comprehensive visibility into the payment process and help you handle transactions effectively in your application.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 5.7473198170000614,
+    "time_to_first_token_s": 0.3431145109998397,
+    "total_duration_s": 5.739633983,
+    "load_duration_s": 0.205391447,
+    "prompt_eval_count": 154,
+    "prompt_eval_duration_s": 0.118002,
+    "eval_count": 223,
+    "eval_duration_s": 5.404173,
+    "tokens_per_second": 41.26440807871991
+  },
+  "resource": {
+    "samples": 14,
+    "vram_used_mb": {
+      "avg": 4916.0,
+      "peak": 4916.0
+    },
+    "gpu_util_pct": {
+      "avg": 91.85714285714286,
+      "peak": 95.0
+    },
+    "power_draw_w": {
+      "avg": 124.91357142857143,
+      "peak": 128.69
+    },
+    "temperature_c": {
+      "avg": 73.92857142857143,
+      "peak": 75.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 4638040390,
+    "size_vram_bytes": 4638040390,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "7.6B"
+  },
+  "error": null
+}

@@ -1,0 +1,58 @@
+{
+  "model": "qwen2.5-coder:7b",
+  "prompt_id": "coding-pgvector-query",
+  "category": "coding",
+  "timestamp": "2026-08-06T18:09:24.843905+00:00",
+  "request": {
+    "system": null,
+    "user": "Write a PostgreSQL query using pgvector that finds the 5 nearest chunks to a given embedding vector `:query_embedding`, restricted to `domain_id = :domain_id`, ordered by cosine distance, using the `<=>` operator.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "To find the 5 nearest chunks to a given embedding vector `:query_embedding` in PostgreSQL with the pgvector extension, you can use the following query. This query restricts the search to a specific `domain_id` and orders the results by cosine distance.\n\nFirst, ensure that the `pgvector` extension is enabled in your database. You can enable it using the following command:\n\n```sql\nCREATE EXTENSION IF NOT EXISTS vector;\n```\n\nNext, you can use the `<=>` operator provided by pgvector to find the nearest neighbors. Here\u2019s how you can write the query:\n\n```sql\nSELECT * FROM chunks\nWHERE domain_id = :domain_id\nORDER BY embedding <=> :query_embedding\nLIMIT 5;\n```\n\n### Explanation:\n- `CREATE EXTENSION IF NOT EXISTS vector;`: This command ensures that the `pgvector` extension is enabled. If it's not already installed, it will be created.\n  \n- `SELECT * FROM chunks`: This selects all columns from the `chunks` table.\n\n- `WHERE domain_id = :domain_id`: This restricts the search to rows where the `domain_id` matches the provided `:domain_id`.\n\n- `ORDER BY embedding <=> :query_embedding`: This orders the results by the cosine distance between the `embedding` column and the `:query_embedding`. The `<=>` operator computes the cosine similarity, so lower values indicate higher similarity (closer vectors).\n\n- `LIMIT 5`: This limits the result to the top 5 rows, which are the nearest chunks based on the cosine distance.\n\n### Parameters:\n- `:domain_id`: This is a parameter that should be replaced with the actual domain ID you want to search within.\n- `:query_embedding`: This is a parameter that should be replaced with the actual embedding vector you want to find the nearest neighbors for.\n\n### Example:\nIf you have a domain ID of 1 and an embedding vector `[0.1, 0.2, 0.3]`, the query would look like this:\n\n```sql\nSELECT * FROM chunks\nWHERE domain_id = 1\nORDER BY embedding <=> '[0.1, 0.2, 0.3]'\nLIMIT 5;\n```\n\nThis will return the 5 chunks from the `chunks` table that are nearest to the given embedding vector within the specified domain, ordered by their cosine distance.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 12.214986778999446,
+    "time_to_first_token_s": 0.28140096700008144,
+    "total_duration_s": 12.206722442,
+    "load_duration_s": 0.209420944,
+    "prompt_eval_count": 75,
+    "prompt_eval_duration_s": 0.055612,
+    "eval_count": 487,
+    "eval_duration_s": 11.933748,
+    "tokens_per_second": 40.80863782275275
+  },
+  "resource": {
+    "samples": 30,
+    "vram_used_mb": {
+      "avg": 4918.0,
+      "peak": 4918.0
+    },
+    "gpu_util_pct": {
+      "avg": 93.23333333333333,
+      "peak": 94.0
+    },
+    "power_draw_w": {
+      "avg": 126.891,
+      "peak": 129.21
+    },
+    "temperature_c": {
+      "avg": 74.9,
+      "peak": 75.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 4638040390,
+    "size_vram_bytes": 4638040390,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "7.6B"
+  },
+  "error": null
+}

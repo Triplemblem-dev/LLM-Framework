@@ -1,0 +1,18 @@
+# Optional overlay: adds an NVIDIA GPU reservation to the ollama service.
+# Linux (with the NVIDIA Container Toolkit installed) or Windows via
+# Docker Desktop's WSL2 backend only - not applicable on Mac, where Docker
+# cannot pass GPU/Metal access through to containers at all (run Ollama
+# natively there instead - see README.md).
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
+
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

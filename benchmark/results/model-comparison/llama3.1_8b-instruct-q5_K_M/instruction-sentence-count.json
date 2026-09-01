@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b-instruct-q5_K_M",
+  "prompt_id": "instruction-sentence-count",
+  "category": "instruction_following",
+  "timestamp": "2026-08-06T18:14:28.992738+00:00",
+  "request": {
+    "system": null,
+    "user": "Explain photosynthesis in exactly 3 sentences. Not 2, not 4 \u2014 exactly 3.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Here is an explanation of photosynthesis in exactly 3 sentences:\n\nPhotosynthesis is the process by which plants, algae, and some bacteria convert light energy from the sun into chemical energy in the form of glucose. This process involves the absorption of carbon dioxide and water through specialized cells on the plant's leaves, followed by the release of oxygen as a byproduct. The resulting glucose provides energy for the plant to grow and thrive, while also serving as food for animals that consume plants or eat other organisms that have fed on them.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 3.3352137020001464,
+    "time_to_first_token_s": 0.3289092280001569,
+    "total_duration_s": 3.327385592,
+    "load_duration_s": 0.265809417,
+    "prompt_eval_count": 32,
+    "prompt_eval_duration_s": 0.04959,
+    "eval_count": 106,
+    "eval_duration_s": 3.006339,
+    "tokens_per_second": 35.25883142253751
+  },
+  "resource": {
+    "samples": 8,
+    "vram_used_mb": {
+      "avg": 5919.0,
+      "peak": 5919.0
+    },
+    "gpu_util_pct": {
+      "avg": 83.25,
+      "peak": 95.0
+    },
+    "power_draw_w": {
+      "avg": 113.23625000000001,
+      "peak": 128.46
+    },
+    "temperature_c": {
+      "avg": 71.0,
+      "peak": 72.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5766727597,
+    "size_vram_bytes": 5766727597,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q5_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

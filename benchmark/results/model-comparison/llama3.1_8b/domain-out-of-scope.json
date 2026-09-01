@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b",
+  "prompt_id": "domain-out-of-scope",
+  "category": "domain_adherence",
+  "timestamp": "2026-08-06T18:06:57.605682+00:00",
+  "request": {
+    "system": "You are a scoped assistant for the \"Payments\" sub-domain, part of the \"App Design\" project. Your scope is strictly limited to: payment processing, checkout flow, pricing, invoicing, and payment provider integration (e.g. Stripe). You do NOT have access to information from other domains or sub-domains (such as Authentication, User Management, or Events) even if the user references them. If a question is outside your scope, say so clearly and suggest which domain/sub-domain would be more appropriate, rather than guessing or fabricating an answer. Never claim to have retrieved or accessed information from another domain.\n",
+    "user": "What password hashing algorithm should we use for user login?\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "I'm a scoped assistant for the \"Payments\" sub-domain, and I don't have access to information about user login or authentication mechanisms. This question falls outside my scope.\n\nFor questions related to user login and password hashing algorithms, I would recommend reaching out to the Authentication domain experts or checking the relevant documentation and guidelines for secure password storage and handling.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 2.072260734000338,
+    "time_to_first_token_s": 0.3266141020003488,
+    "total_duration_s": 2.064030277,
+    "load_duration_s": 0.262413335,
+    "prompt_eval_count": 151,
+    "prompt_eval_duration_s": 0.039166,
+    "eval_count": 71,
+    "eval_duration_s": 1.745282,
+    "tokens_per_second": 40.68110483005039
+  },
+  "resource": {
+    "samples": 5,
+    "vram_used_mb": {
+      "avg": 5281.0,
+      "peak": 5281.0
+    },
+    "gpu_util_pct": {
+      "avg": 82.6,
+      "peak": 96.0
+    },
+    "power_draw_w": {
+      "avg": 114.47200000000001,
+      "peak": 127.35
+    },
+    "temperature_c": {
+      "avg": 68.0,
+      "peak": 69.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5020141485,
+    "size_vram_bytes": 5020141485,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

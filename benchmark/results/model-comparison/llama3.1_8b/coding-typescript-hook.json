@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b",
+  "prompt_id": "coding-typescript-hook",
+  "category": "coding",
+  "timestamp": "2026-08-06T18:07:40.466748+00:00",
+  "request": {
+    "system": null,
+    "user": "Write a TypeScript React (Next.js client component) hook `useDomains(token: string)` that fetches `GET /domains` with a Bearer token, handles loading/error state, and returns `{ domains, loading, error }`. Just the code.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "```typescript\nimport { useState, useEffect } from 'react';\nimport axios from 'axios';\n\nconst useDomains = (token: string) => {\n  const [domains, setDomains] = useState([]);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState(null);\n\n  useEffect(() => {\n    const fetchDomains = async () => {\n      try {\n        const response = await axios.get('/domains', {\n          headers: {\n            Authorization: `Bearer ${token}`,\n          },\n        });\n        setDomains(response.data.domains);\n      } catch (err) {\n        setError(err.message);\n      } finally {\n        setLoading(false);\n      }\n    };\n    fetchDomains();\n  }, [token]);\n\n  return { domains, loading, error };\n};\n\nexport default useDomains;\n```",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 4.470516490000591,
+    "time_to_first_token_s": 0.3428409799998917,
+    "total_duration_s": 4.462189509,
+    "load_duration_s": 0.264304153,
+    "prompt_eval_count": 61,
+    "prompt_eval_duration_s": 0.059947,
+    "eval_count": 165,
+    "eval_duration_s": 4.127712999,
+    "tokens_per_second": 39.97370942213611
+  },
+  "resource": {
+    "samples": 11,
+    "vram_used_mb": {
+      "avg": 5278.0,
+      "peak": 5278.0
+    },
+    "gpu_util_pct": {
+      "avg": 85.72727272727273,
+      "peak": 95.0
+    },
+    "power_draw_w": {
+      "avg": 122.33454545454546,
+      "peak": 128.73
+    },
+    "temperature_c": {
+      "avg": 73.18181818181819,
+      "peak": 74.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5020141485,
+    "size_vram_bytes": 5020141485,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

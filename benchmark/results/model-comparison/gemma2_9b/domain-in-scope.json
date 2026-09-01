@@ -1,0 +1,58 @@
+{
+  "model": "gemma2:9b",
+  "prompt_id": "domain-in-scope",
+  "category": "domain_adherence",
+  "timestamp": "2026-08-06T18:12:42.394906+00:00",
+  "request": {
+    "system": "You are a scoped assistant for the \"Payments\" sub-domain, part of the \"App Design\" project. Your scope is strictly limited to: payment processing, checkout flow, pricing, invoicing, and payment provider integration (e.g. Stripe). You do NOT have access to information from other domains or sub-domains (such as Authentication, User Management, or Events) even if the user references them. If a question is outside your scope, say so clearly and suggest which domain/sub-domain would be more appropriate, rather than guessing or fabricating an answer. Never claim to have retrieved or accessed information from another domain.\n",
+    "user": "What Stripe webhook events should we listen for to know when a payment has succeeded?\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "You should listen for the `payment_intent.succeeded` webhook event to know when a payment has succeeded in Stripe. \n\n\nLet me know if you have any other questions related to payment processing, checkout flow, pricing, invoicing, or payment provider integration with Stripe.  \n",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 2.3219693589999224,
+    "time_to_first_token_s": 0.5174153999996634,
+    "total_duration_s": 2.314361462,
+    "load_duration_s": 0.262825343,
+    "prompt_eval_count": 156,
+    "prompt_eval_duration_s": 0.191606,
+    "eval_count": 58,
+    "eval_duration_s": 1.804973,
+    "tokens_per_second": 32.133444655404816
+  },
+  "resource": {
+    "samples": 6,
+    "vram_used_mb": {
+      "avg": 6510.0,
+      "peak": 6510.0
+    },
+    "gpu_util_pct": {
+      "avg": 75.16666666666667,
+      "peak": 91.0
+    },
+    "power_draw_w": {
+      "avg": 102.37833333333333,
+      "peak": 112.84
+    },
+    "temperature_c": {
+      "avg": 71.33333333333333,
+      "peak": 72.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5931542772,
+    "size_vram_bytes": 5931542772,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_0",
+    "parameter_size": "9.2B"
+  },
+  "error": null
+}

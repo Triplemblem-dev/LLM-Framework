@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b-instruct-q5_K_M",
+  "prompt_id": "requirements-atomic-decomposition",
+  "category": "requirements_engineering",
+  "timestamp": "2026-08-06T18:15:56.895005+00:00",
+  "request": {
+    "system": null,
+    "user": "Break this into atomic, individually testable requirements: \"The system should let users reset their password securely and be notified of the change.\"\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Here are the individual, testable requirements broken down from the original statement:\n\n**Atomic Requirements:**\n\n1. **Requirement 1:** The system allows users to initiate a password reset process.\n\t* Test cases:\n\t\t+ The user can access the password reset page via the login form or a dedicated link.\n\t\t+ The user's username/email address is validated on the password reset page.\n2. **Requirement 2:** The system sends a secure password reset token to the user's registered email address.\n\t* Test cases:\n\t\t+ A valid email address is sent with a unique and temporary password reset token.\n\t\t+ An invalid email address does not receive a password reset token.\n3. **Requirement 3:** The system allows users to enter their new password after receiving the password reset token.\n\t* Test cases:\n\t\t+ The user can enter a new password on the password reset page.\n\t\t+ The new password meets the minimum length and complexity requirements (if applicable).\n4. **Requirement 4:** The system updates the user's password securely using the entered new password.\n\t* Test cases:\n\t\t+ The old password is not stored or transmitted during the password reset process.\n\t\t+ The new password is hashed and stored securely in the database.\n5. **Requirement 5:** The system notifies the user of the successful password change via email.\n\t* Test cases:\n\t\t+ A confirmation email with a success message is sent to the user's registered email address.\n\t\t+ An error message is displayed if the password reset process fails.\n\n**Additional Requirements:**\n\n1. **Password Expiration:** The system requires users to update their password periodically (e.g., every 60 days).\n2. **Password Strength:** The system enforces strong password requirements, such as minimum length and complexity.\n3. **Rate Limiting:** The system limits the number of password reset attempts within a certain time frame.\n\nThese individual requirements can be tested separately using various testing techniques, including unit testing, integration testing, and UI testing.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 12.269082544999947,
+    "time_to_first_token_s": 0.33872565899946494,
+    "total_duration_s": 12.261331678,
+    "load_duration_s": 0.261373369,
+    "prompt_eval_count": 37,
+    "prompt_eval_duration_s": 0.050258,
+    "eval_count": 417,
+    "eval_duration_s": 11.930139,
+    "tokens_per_second": 34.95349048322069
+  },
+  "resource": {
+    "samples": 30,
+    "vram_used_mb": {
+      "avg": 5944.0,
+      "peak": 5944.0
+    },
+    "gpu_util_pct": {
+      "avg": 92.26666666666667,
+      "peak": 96.0
+    },
+    "power_draw_w": {
+      "avg": 127.35100000000001,
+      "peak": 129.88
+    },
+    "temperature_c": {
+      "avg": 76.06666666666666,
+      "peak": 77.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5766727597,
+    "size_vram_bytes": 5766727597,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q5_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

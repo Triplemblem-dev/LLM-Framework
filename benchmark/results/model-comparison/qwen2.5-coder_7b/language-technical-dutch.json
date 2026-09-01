@@ -1,0 +1,58 @@
+{
+  "model": "qwen2.5-coder:7b",
+  "prompt_id": "language-technical-dutch",
+  "category": "language",
+  "timestamp": "2026-08-06T18:09:39.768541+00:00",
+  "request": {
+    "system": null,
+    "user": "Leg in het Nederlands uit wat een \"message queue\" is in de context van backend-systemen, zonder de Engelse term steeds opnieuw te vertalen op een verwarrende manier.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Een berichtwachtrij is net zo belangrijk als een postkast voor jouw computer. In plaats van direct een brief aan een vriend te sturen en te wachten totdat hij het krijgt, verstuur je de brief in een speciale plek (de postkast) waarin hij later kan komen halen. Zo kunt je geen telefoonoproep maken of even lang moeten wachten tot je antwoord wordt ontvangen.\n\nIn de wereld van computers is een berichtwachtrij vergelijkbaar. Toch zijn het computerprogramma's die de \"berichten\" (zoals e-mails, bestanden, of andere gegevens) versturen en ontvangen, in plaats van mensen. \n\nDeze berichtwachtrij helpt om informatie te delen tussen verschillende delen van een grote, complexe computerprogramma. Stel je voor dat je een e-commerce-website hebt; wanneer iemand een bestelling maakt, stuur je die informatie naar de \"berichtwachtrij\" in plaats daarvan direct naar het systeem waar de bestelling wordt verwerkt. Dit maakt het systeem sneller en minder lastig voor elke stap van het proces.\n\nDit is essentieel voor backend-systemen omdat het ervoor zorgt dat alle taken, of \"berichten\", worden afgerond voordat de volgende begint. Zo kunnen je systemen effici\u00ebnter werken en er minder fouten in zijn.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 8.178611412999999,
+    "time_to_first_token_s": 0.2711673170006179,
+    "total_duration_s": 8.170729112,
+    "load_duration_s": 0.208655283,
+    "prompt_eval_count": 72,
+    "prompt_eval_duration_s": 0.050882,
+    "eval_count": 324,
+    "eval_duration_s": 7.907469,
+    "tokens_per_second": 40.973919720709624
+  },
+  "resource": {
+    "samples": 20,
+    "vram_used_mb": {
+      "avg": 4921.25,
+      "peak": 4923.0
+    },
+    "gpu_util_pct": {
+      "avg": 89.45,
+      "peak": 94.0
+    },
+    "power_draw_w": {
+      "avg": 125.152,
+      "peak": 129.43
+    },
+    "temperature_c": {
+      "avg": 75.1,
+      "peak": 76.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 4638040390,
+    "size_vram_bytes": 4638040390,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "7.6B"
+  },
+  "error": null
+}

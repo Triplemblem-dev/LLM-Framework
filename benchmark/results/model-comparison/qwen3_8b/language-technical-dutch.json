@@ -1,0 +1,58 @@
+{
+  "model": "qwen3:8b",
+  "prompt_id": "language-technical-dutch",
+  "category": "language",
+  "timestamp": "2026-08-06T18:11:41.315943+00:00",
+  "request": {
+    "system": null,
+    "user": "Leg in het Nederlands uit wat een \"message queue\" is in de context van backend-systemen, zonder de Engelse term steeds opnieuw te vertalen op een verwarrende manier.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Een **message queue** is een systeem dat berichten tussen verschillende onderdelen van een backend-ontwikkeling verstuurt. Deze berichten worden opgeslagen in een rij (queue) en worden later verwerkt door een andere component of service. \n\nDe belangrijkste functie van een message queue is dat het de communicatie tussen onderdelen decoupleert. Dit betekent dat de component die een bericht stuurt niet hoeft te wachten op de component die het bericht verwerkt. In plaats daarvan wordt het bericht opgeslagen en verwerkt wanneer de tijd daartoe rijp is. Dit draagt bij aan betere schaalbaarheid, betrouwbaarheid en flexibiliteit in complexe backend-systemen.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 4.568031142000109,
+    "time_to_first_token_s": 0.2853172990007806,
+    "total_duration_s": 4.560278813,
+    "load_duration_s": 0.209265447,
+    "prompt_eval_count": 59,
+    "prompt_eval_duration_s": 0.061925,
+    "eval_count": 168,
+    "eval_duration_s": 4.28267,
+    "tokens_per_second": 39.22786486000555
+  },
+  "resource": {
+    "samples": 11,
+    "vram_used_mb": {
+      "avg": 5554.0,
+      "peak": 5554.0
+    },
+    "gpu_util_pct": {
+      "avg": 90.63636363636364,
+      "peak": 99.0
+    },
+    "power_draw_w": {
+      "avg": 123.42727272727274,
+      "peak": 129.89
+    },
+    "temperature_c": {
+      "avg": 75.63636363636364,
+      "peak": 76.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5295172484,
+    "size_vram_bytes": 5295172484,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.2B"
+  },
+  "error": null
+}

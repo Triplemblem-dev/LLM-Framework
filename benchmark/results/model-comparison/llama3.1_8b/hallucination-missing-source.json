@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b",
+  "prompt_id": "hallucination-missing-source",
+  "category": "hallucination_resistance",
+  "timestamp": "2026-08-06T18:07:27.107359+00:00",
+  "request": {
+    "system": "You must answer ONLY using the DOCUMENT below. If the document is empty or does not contain the answer, say so explicitly and do not use outside knowledge.\n",
+    "user": "DOCUMENT:\n(no document has been uploaded to this domain yet)\n\nQUESTION: According to our uploaded architecture doc, which message\nqueue are we using \u2014 RabbitMQ or Kafka?\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "I don't have enough information to provide an accurate answer. The document that would contain the necessary information for answering your question is empty.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 1.0535930189998908,
+    "time_to_first_token_s": 0.3697387180000078,
+    "total_duration_s": 1.045077115,
+    "load_duration_s": 0.261264896,
+    "prompt_eval_count": 80,
+    "prompt_eval_duration_s": 0.069997,
+    "eval_count": 28,
+    "eval_duration_s": 0.683854,
+    "tokens_per_second": 40.9444121113571
+  },
+  "resource": {
+    "samples": 3,
+    "vram_used_mb": {
+      "avg": 5278.0,
+      "peak": 5278.0
+    },
+    "gpu_util_pct": {
+      "avg": 83.66666666666667,
+      "peak": 96.0
+    },
+    "power_draw_w": {
+      "avg": 111.45,
+      "peak": 129.41
+    },
+    "temperature_c": {
+      "avg": 72.0,
+      "peak": 73.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5020141485,
+    "size_vram_bytes": 5020141485,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

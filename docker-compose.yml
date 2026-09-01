@@ -1,0 +1,93 @@
+# Cross-platform base configuration for Linux, Windows (Docker Desktop/WSL2),
+# and macOS. It has no GPU requirement. Backend and frontend ports are
+# published directly to the host for a trusted local installation; this is not
+# a hardened public-internet reverse-proxy configuration. See README.md for
+# platform-specific notes.
+#
+# Requires a .env file next to this one - copy .env.example and fill it in.
+#
+# GPU acceleration for the ollama service is opt-in, not required - add
+# `-f docker-compose.gpu.yml` (Linux/Windows-WSL2 with an NVIDIA GPU only;
+# see README.md). Without it, ollama still works, just CPU-only.
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-llmframework}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env - see .env.example}
+      POSTGRES_DB: ${POSTGRES_DB:-llmframework}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-llmframework} -d ${POSTGRES_DB:-llmframework}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    environment:
+      # Match the native-install tuning in scripts/configure-ollama.sh.
+      OLLAMA_FLASH_ATTENTION: "1"
+      OLLAMA_KV_CACHE_TYPE: "q8_0"
+    volumes:
+      - ollama_data:/root/.ollama
+    # CPU-only by default in this base file - see docker-compose.gpu.yml
+    # for the NVIDIA device reservation overlay. Mac users wanting GPU
+    # acceleration should run Ollama natively instead (Docker Desktop for
+    # Mac cannot pass Metal through to containers) - see README.md.
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-llmframework}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-llmframework}
+      APP_ACCESS_TOKEN: ${APP_ACCESS_TOKEN:?set APP_ACCESS_TOKEN in .env - see .env.example}
+      # Override in .env to point at a native Ollama install instead of the
+      # bundled container, e.g. http://host.docker.internal:11434 (Mac/
+      # Windows Docker Desktop) - see README.md.
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://ollama:11434}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-nomic-embed-text}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      REPOSITORY_MAX_ARCHIVE_BYTES: ${REPOSITORY_MAX_ARCHIVE_BYTES:-104857600}
+      REPOSITORY_MAX_UNCOMPRESSED_BYTES: ${REPOSITORY_MAX_UNCOMPRESSED_BYTES:-524288000}
+      REPOSITORY_MAX_MEMBERS: ${REPOSITORY_MAX_MEMBERS:-20000}
+      REPOSITORY_MAX_FILE_BYTES: ${REPOSITORY_MAX_FILE_BYTES:-2097152}
+      REPOSITORY_MAX_COMPRESSION_RATIO: ${REPOSITORY_MAX_COMPRESSION_RATIO:-100}
+      REPOSITORY_RESULT_LIMIT: ${REPOSITORY_RESULT_LIMIT:-8}
+      REPOSITORY_CHARACTER_LIMIT: ${REPOSITORY_CHARACTER_LIMIT:-12000}
+      OPTIMIZER_CONTEXT_CEILING: ${OPTIMIZER_CONTEXT_CEILING:-65536}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Ollama is intentionally not a hard Compose dependency. The setup launcher
+    # may connect the backend to a native or remote Ollama endpoint and starts
+    # the bundled Ollama service explicitly only when that mode is selected.
+    # A normal unqualified `docker compose up` still starts every service.
+    extra_hosts:
+      # Makes native-host Ollama reachable from Linux containers too. Docker
+      # Desktop already provides this name on macOS and Windows.
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - backend_storage:/app/storage
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
+  ollama_data:
+  backend_storage:

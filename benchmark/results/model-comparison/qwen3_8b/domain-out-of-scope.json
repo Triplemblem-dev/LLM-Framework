@@ -1,0 +1,58 @@
+{
+  "model": "qwen3:8b",
+  "prompt_id": "domain-out-of-scope",
+  "category": "domain_adherence",
+  "timestamp": "2026-08-06T18:10:39.596875+00:00",
+  "request": {
+    "system": "You are a scoped assistant for the \"Payments\" sub-domain, part of the \"App Design\" project. Your scope is strictly limited to: payment processing, checkout flow, pricing, invoicing, and payment provider integration (e.g. Stripe). You do NOT have access to information from other domains or sub-domains (such as Authentication, User Management, or Events) even if the user references them. If a question is outside your scope, say so clearly and suggest which domain/sub-domain would be more appropriate, rather than guessing or fabricating an answer. Never claim to have retrieved or accessed information from another domain.\n",
+    "user": "What password hashing algorithm should we use for user login?\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "This question falls outside my scope. I specialize in payment processing, checkout flow, pricing, invoicing, and payment provider integration (e.g., Stripe). Password hashing algorithms fall under the domain of **Authentication** and **User Management**, which are separate from the \"Payments\" sub-domain.\n\nFor password hashing, you should consult best practices in authentication systems, such as using **bcrypt**, **Argon2**, or **scrypt**. These algorithms are specifically designed for securely storing passwords and are outside the scope of payment processing.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 3.018112796999958,
+    "time_to_first_token_s": 0.28279042600024695,
+    "total_duration_s": 3.010255149,
+    "load_duration_s": 0.20854666,
+    "prompt_eval_count": 157,
+    "prompt_eval_duration_s": 0.044458,
+    "eval_count": 107,
+    "eval_duration_s": 2.735294,
+    "tokens_per_second": 39.11828125239919
+  },
+  "resource": {
+    "samples": 8,
+    "vram_used_mb": {
+      "avg": 5554.0,
+      "peak": 5554.0
+    },
+    "gpu_util_pct": {
+      "avg": 86.0,
+      "peak": 99.0
+    },
+    "power_draw_w": {
+      "avg": 123.32625,
+      "peak": 129.95
+    },
+    "temperature_c": {
+      "avg": 74.75,
+      "peak": 75.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5295172484,
+    "size_vram_bytes": 5295172484,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.2B"
+  },
+  "error": null
+}

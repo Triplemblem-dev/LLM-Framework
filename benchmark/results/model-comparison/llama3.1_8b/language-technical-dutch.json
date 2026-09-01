@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b",
+  "prompt_id": "language-technical-dutch",
+  "category": "language",
+  "timestamp": "2026-08-06T18:07:50.176067+00:00",
+  "request": {
+    "system": null,
+    "user": "Leg in het Nederlands uit wat een \"message queue\" is in de context van backend-systemen, zonder de Engelse term steeds opnieuw te vertalen op een verwarrende manier.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Een message queue (afgekort als MQ) is een centrale datastructuur waarbij berichten of gegevens die door een applicatie worden gegenereerd, in een wachtrij worden gestopt en later door een andere proces opgeroepen kunnen worden.\n\nDenk aan een postbus voor digitale boodschappen. Wanneer een softwarecomponent (bijvoorbeeld een microservice) iets wilt communiceren met een ander component, wordt de berichtgeving in de message queue geplaatst. Een afzonderlijk proces, dat zich bezighoudt met het verwerken van deze berichten, trekt ze uit de wachtrij en verwerkt ze vervolgens.\n\nDe belangrijkste eigenschappen van een MQ zijn:\n\n1. **Asynchroon**: componenten communiceren asynchroon met elkaar door middel van berichtgeving in de message queue.\n2. **Wachtrijgedrag**: wanneer een component geen beschikbaar proces heeft om de berichten te verwerken, worden ze in de wachtrij geplaatst en opgeroepen wanneer het proces beschikbaar is.\n3. **Berichtgebaseerd**: communicatie tussen componenten vindt plaats via het versturen en ontvangen van specifieke berichten.\n\nBijvoorbeeld: een webserver stuurt een bericht naar de message queue met daarin gegevens over nieuwe orders, die later door een back-end proces (zoals een orderbeheerder) worden verwerkt.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 8.62937816900012,
+    "time_to_first_token_s": 0.32321888099977514,
+    "total_duration_s": 8.620887618,
+    "load_duration_s": 0.254784836,
+    "prompt_eval_count": 53,
+    "prompt_eval_duration_s": 0.054273,
+    "eval_count": 332,
+    "eval_duration_s": 8.306064,
+    "tokens_per_second": 39.97079723922185
+  },
+  "resource": {
+    "samples": 21,
+    "vram_used_mb": {
+      "avg": 5278.0,
+      "peak": 5278.0
+    },
+    "gpu_util_pct": {
+      "avg": 91.66666666666667,
+      "peak": 96.0
+    },
+    "power_draw_w": {
+      "avg": 125.25904761904762,
+      "peak": 129.82
+    },
+    "temperature_c": {
+      "avg": 73.66666666666667,
+      "peak": 74.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5020141485,
+    "size_vram_bytes": 5020141485,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

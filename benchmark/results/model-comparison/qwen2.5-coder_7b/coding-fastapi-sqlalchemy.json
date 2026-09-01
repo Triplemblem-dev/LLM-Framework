@@ -1,0 +1,58 @@
+{
+  "model": "qwen2.5-coder:7b",
+  "prompt_id": "coding-fastapi-sqlalchemy",
+  "category": "coding",
+  "timestamp": "2026-08-06T18:09:12.619700+00:00",
+  "request": {
+    "system": null,
+    "user": "Write a FastAPI endpoint `POST /domains/{domain_id}/subdomains` that creates a sub-domain using SQLAlchemy (async session), enforces that the parent domain has no parent itself (two-level nesting only), and returns a 400 with a clear error if violated. Just the code.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "```python\nfrom fastapi import FastAPI, HTTPException, Path\nfrom sqlalchemy.ext.asyncio import AsyncSession\nfrom sqlalchemy.future import select\nfrom typing import Optional\n\napp = FastAPI()\n\n# Assuming you have SQLAlchemy models and dependencies set up\n# Domain and Subdomain are your SQLAlchemy models\n# get_db is a dependency function to provide an async session\n\n@app.post(\"/domains/{domain_id}/subdomains\")\nasync def create_subdomain(\n    domain_id: int = Path(..., description=\"The ID of the parent domain\"),\n    subdomain_name: str,\n    db: AsyncSession = Depends(get_db),\n):\n    # Check if the parent domain exists and has no parent itself\n    async with db.begin():\n        query = select(Domain).where(Domain.id == domain_id)\n        result = await db.execute(query)\n        parent_domain = result.scalar_one_or_none()\n\n        if not parent_domain:\n            raise HTTPException(status_code=404, detail=\"Parent domain not found\")\n\n        if parent_domain.parent_id is not None:\n            raise HTTPException(status_code=400, detail=\"Two-level nesting only allowed\")\n\n    # Create the subdomain\n    subdomain = Subdomain(name=subdomain_name, parent_id=domain_id)\n    db.add(subdomain)\n\n    try:\n        await db.commit()\n        await db.refresh(subdomain)\n    except Exception as e:\n        await db.rollback()\n        raise HTTPException(status_code=500, detail=str(e))\n\n    return {\"subdomain\": subdomain}\n```",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 7.997353707000002,
+    "time_to_first_token_s": 0.29244235300029686,
+    "total_duration_s": 7.988875724,
+    "load_duration_s": 0.206121112,
+    "prompt_eval_count": 90,
+    "prompt_eval_duration_s": 0.073532,
+    "eval_count": 315,
+    "eval_duration_s": 7.704966,
+    "tokens_per_second": 40.88272420669994
+  },
+  "resource": {
+    "samples": 20,
+    "vram_used_mb": {
+      "avg": 4917.9,
+      "peak": 4918.0
+    },
+    "gpu_util_pct": {
+      "avg": 93.5,
+      "peak": 94.0
+    },
+    "power_draw_w": {
+      "avg": 124.5615,
+      "peak": 128.95
+    },
+    "temperature_c": {
+      "avg": 74.75,
+      "peak": 75.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 4638040390,
+    "size_vram_bytes": 4638040390,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "7.6B"
+  },
+  "error": null
+}

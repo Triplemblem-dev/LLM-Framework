@@ -1,0 +1,58 @@
+{
+  "model": "gemma2:9b",
+  "prompt_id": "instruction-multistep-format",
+  "category": "instruction_following",
+  "timestamp": "2026-08-06T18:12:20.459703+00:00",
+  "request": {
+    "system": null,
+    "user": "List the numbers 1 to 6. For each even number, write \"even: X\" on its own line. For each odd number, write \"odd: X\" on its own line. Do not add any other text, headers, or explanation.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "odd: 1\neven: 2\nodd: 3\neven: 4\nodd: 5\neven: 6 \n",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 1.4278015159998176,
+    "time_to_first_token_s": 0.4540527609997298,
+    "total_duration_s": 1.420233011,
+    "load_duration_s": 0.322334539,
+    "prompt_eval_count": 63,
+    "prompt_eval_duration_s": 0.108536,
+    "eval_count": 32,
+    "eval_duration_s": 0.973776,
+    "tokens_per_second": 32.861766977210365
+  },
+  "resource": {
+    "samples": 4,
+    "vram_used_mb": {
+      "avg": 6510.0,
+      "peak": 6510.0
+    },
+    "gpu_util_pct": {
+      "avg": 68.75,
+      "peak": 91.0
+    },
+    "power_draw_w": {
+      "avg": 96.83500000000001,
+      "peak": 111.8
+    },
+    "temperature_c": {
+      "avg": 70.25,
+      "peak": 71.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5931542772,
+    "size_vram_bytes": 5931542772,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_0",
+    "parameter_size": "9.2B"
+  },
+  "error": null
+}

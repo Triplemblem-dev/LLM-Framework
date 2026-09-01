@@ -1,0 +1,58 @@
+{
+  "model": "qwen3:8b",
+  "prompt_id": "coding-pgvector-query",
+  "category": "coding",
+  "timestamp": "2026-08-06T18:11:26.310705+00:00",
+  "request": {
+    "system": null,
+    "user": "Write a PostgreSQL query using pgvector that finds the 5 nearest chunks to a given embedding vector `:query_embedding`, restricted to `domain_id = :domain_id`, ordered by cosine distance, using the `<=>` operator.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Here's a PostgreSQL query using `pgvector` that finds the 5 nearest chunks to a given embedding vector `:query_embedding`, restricted to `domain_id = :domain_id`, ordered by cosine distance using the `<=>` operator:\n\n```sql\nSELECT *\nFROM chunks\nWHERE domain_id = :domain_id\nORDER BY embedding <=> :query_embedding\nLIMIT 5;\n```\n\n### Explanation:\n\n- `embedding <=> :query_embedding` is the **cosine distance** operator in `pgvector`.\n- This will return the chunks with the smallest cosine distances (i.e., the most similar embeddings).\n- `LIMIT 5` ensures only the top 5 results are returned.\n- The `WHERE` clause filters chunks by the specified `domain_id`.\n\n### Prerequisites:\n\n- You need to have the `pgvector` extension installed and enabled in your PostgreSQL instance.\n- The `chunks` table must have a column named `embedding` of type `vector`, and a `domain_id` column (probably an integer or UUID).\n\nLet me know if you want to add more filtering, include metadata, or sort in descending order of similarity!",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 6.270024395000291,
+    "time_to_first_token_s": 0.31286424700010684,
+    "total_duration_s": 6.262343375,
+    "load_duration_s": 0.208913711,
+    "prompt_eval_count": 62,
+    "prompt_eval_duration_s": 0.061834,
+    "eval_count": 232,
+    "eval_duration_s": 5.95682,
+    "tokens_per_second": 38.946954918899685
+  },
+  "resource": {
+    "samples": 16,
+    "vram_used_mb": {
+      "avg": 5554.0,
+      "peak": 5554.0
+    },
+    "gpu_util_pct": {
+      "avg": 95.4375,
+      "peak": 98.0
+    },
+    "power_draw_w": {
+      "avg": 126.52562499999999,
+      "peak": 129.92
+    },
+    "temperature_c": {
+      "avg": 75.875,
+      "peak": 76.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5295172484,
+    "size_vram_bytes": 5295172484,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.2B"
+  },
+  "error": null
+}

@@ -1,0 +1,58 @@
+{
+  "model": "qwen2.5-coder:7b",
+  "prompt_id": "language-dutch-response",
+  "category": "language",
+  "timestamp": "2026-08-06T18:09:31.581516+00:00",
+  "request": {
+    "system": null,
+    "user": "Answer in Dutch only, no English: What is the capital of France, and what is one famous landmark there?\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Parijs is de hoofdstad van Frankrijk en een beremmerlijk bekendst terrein daar is het Eiffeltoren.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 1.01226124599998,
+    "time_to_first_token_s": 0.2708572869996715,
+    "total_duration_s": 1.004578135,
+    "load_duration_s": 0.210671272,
+    "prompt_eval_count": 52,
+    "prompt_eval_duration_s": 0.045382,
+    "eval_count": 31,
+    "eval_duration_s": 0.74143,
+    "tokens_per_second": 41.81109477631064
+  },
+  "resource": {
+    "samples": 3,
+    "vram_used_mb": {
+      "avg": 4920.0,
+      "peak": 4923.0
+    },
+    "gpu_util_pct": {
+      "avg": 69.0,
+      "peak": 93.0
+    },
+    "power_draw_w": {
+      "avg": 114.54666666666667,
+      "peak": 127.79
+    },
+    "temperature_c": {
+      "avg": 74.0,
+      "peak": 75.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 4638040390,
+    "size_vram_bytes": 4638040390,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "7.6B"
+  },
+  "error": null
+}

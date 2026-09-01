@@ -1,0 +1,58 @@
+{
+  "model": "qwen2.5-coder:7b",
+  "prompt_id": "coding-typescript-hook",
+  "category": "coding",
+  "timestamp": "2026-08-06T18:09:30.560906+00:00",
+  "request": {
+    "system": null,
+    "user": "Write a TypeScript React (Next.js client component) hook `useDomains(token: string)` that fetches `GET /domains` with a Bearer token, handles loading/error state, and returns `{ domains, loading, error }`. Just the code.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "```typescript\nimport { useState, useEffect } from 'react';\n\ninterface Domain {\n  id: number;\n  name: string;\n  // Add other domain properties as needed\n}\n\nconst useDomains = (token: string) => {\n  const [domains, setDomains] = useState<Domain[]>([]);\n  const [loading, setLoading] = useState<boolean>(true);\n  const [error, setError] = useState<string | null>(null);\n\n  useEffect(() => {\n    const fetchDomains = async () => {\n      try {\n        const response = await fetch('/api/domains', {\n          headers: {\n            'Authorization': `Bearer ${token}`\n          }\n        });\n        \n        if (!response.ok) {\n          throw new Error('Failed to fetch domains');\n        }\n\n        const data = await response.json();\n        setDomains(data);\n      } catch (err) {\n        setError((err as Error).message);\n      } finally {\n        setLoading(false);\n      }\n    };\n\n    fetchDomains();\n  }, [token]);\n\n  return { domains, loading, error };\n};\n\nexport default useDomains;\n```",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 5.708571447000395,
+    "time_to_first_token_s": 0.28341955700034305,
+    "total_duration_s": 5.700334209,
+    "load_duration_s": 0.208936951,
+    "prompt_eval_count": 80,
+    "prompt_eval_duration_s": 0.056538,
+    "eval_count": 222,
+    "eval_duration_s": 5.425098,
+    "tokens_per_second": 40.92091976955992
+  },
+  "resource": {
+    "samples": 14,
+    "vram_used_mb": {
+      "avg": 4918.0,
+      "peak": 4918.0
+    },
+    "gpu_util_pct": {
+      "avg": 92.14285714285714,
+      "peak": 94.0
+    },
+    "power_draw_w": {
+      "avg": 124.62,
+      "peak": 128.98
+    },
+    "temperature_c": {
+      "avg": 74.85714285714286,
+      "peak": 75.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 4638040390,
+    "size_vram_bytes": 4638040390,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "7.6B"
+  },
+  "error": null
+}

@@ -1,0 +1,58 @@
+{
+  "model": "qwen3:8b",
+  "prompt_id": "domain-in-scope",
+  "category": "domain_adherence",
+  "timestamp": "2026-08-06T18:10:36.570549+00:00",
+  "request": {
+    "system": "You are a scoped assistant for the \"Payments\" sub-domain, part of the \"App Design\" project. Your scope is strictly limited to: payment processing, checkout flow, pricing, invoicing, and payment provider integration (e.g. Stripe). You do NOT have access to information from other domains or sub-domains (such as Authentication, User Management, or Events) even if the user references them. If a question is outside your scope, say so clearly and suggest which domain/sub-domain would be more appropriate, rather than guessing or fabricating an answer. Never claim to have retrieved or accessed information from another domain.\n",
+    "user": "What Stripe webhook events should we listen for to know when a payment has succeeded?\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "To know when a payment has succeeded using Stripe, you should listen for the `payment_intent.succeeded` webhook event. This event is triggered when a PaymentIntent is successfully processed and the payment is confirmed.\n\n### Key Details:\n- **Event Name**: `payment_intent.succeeded`\n- **Description**: Indicates that the payment has been successfully processed and the funds are reserved or transferred, depending on the payment method and region.\n- **Use Case**: Ideal for confirming that a payment has been completed and for updating your system (e.g., fulfilling an order, issuing a receipt, etc.).\n\n### Additional Notes:\n- You should also consider the `charge.succeeded` event if you're using classic charges (not PaymentIntents), though PaymentIntents are the recommended approach for modern integrations.\n- Always verify the event signature to ensure the event is genuinely sent by Stripe and not tampered with.\n\nIf you're using Stripe's Checkout or Elements, the `payment_intent.succeeded` event is the most relevant for tracking successful payments.\n\nLet me know if you'd like guidance on how to set up the webhook or handle the event in your backend!",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 6.327205038000102,
+    "time_to_first_token_s": 0.39183856999989075,
+    "total_duration_s": 6.319381333,
+    "load_duration_s": 0.210688292,
+    "prompt_eval_count": 162,
+    "prompt_eval_duration_s": 0.146266,
+    "eval_count": 230,
+    "eval_duration_s": 5.935269,
+    "tokens_per_second": 38.75140284290401
+  },
+  "resource": {
+    "samples": 16,
+    "vram_used_mb": {
+      "avg": 5553.875,
+      "peak": 5554.0
+    },
+    "gpu_util_pct": {
+      "avg": 96.0625,
+      "peak": 99.0
+    },
+    "power_draw_w": {
+      "avg": 126.128125,
+      "peak": 129.95
+    },
+    "temperature_c": {
+      "avg": 74.75,
+      "peak": 75.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5295172484,
+    "size_vram_bytes": 5295172484,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.2B"
+  },
+  "error": null
+}

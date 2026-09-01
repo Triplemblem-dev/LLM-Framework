@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b-instruct-q5_K_M",
+  "prompt_id": "coding-fastapi-sqlalchemy",
+  "category": "coding",
+  "timestamp": "2026-08-06T18:15:20.051716+00:00",
+  "request": {
+    "system": null,
+    "user": "Write a FastAPI endpoint `POST /domains/{domain_id}/subdomains` that creates a sub-domain using SQLAlchemy (async session), enforces that the parent domain has no parent itself (two-level nesting only), and returns a 400 with a clear error if violated. Just the code.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "```python\nfrom fastapi import FastAPI, Depends, Request, HTTPException\nfrom pydantic import BaseModel\nfrom sqlalchemy.orm import Session\nfrom typing import List\n\napp = FastAPI()\n\nclass Subdomain(BaseModel):\n    name: str\n\n# ... (db connection and models)\n\n@app.post(\"/domains/{domain_id}/subdomains\")\nasync def create_subdomain(\n    domain_id: int, \n    subdomain_data: Subdomain,\n    db: Session = Depends(database.get_db)\n):\n    parent_domain = await db.get(parent_domain_model, domain_id)\n    \n    if parent_domain.parent_id:\n        raise HTTPException(status_code=400, detail=\"Parent domain has a parent itself\")\n    \n    new_subdomain = subdomain_model(**subdomain_data.dict())\n    new_subdomain.domain_id = domain_id\n    db.add(new_subdomain)\n    await db.commit()\n    \n    return new_subdomain\n```\nNote: The code assumes you have a `database.get_db` function to get the database session, and a `parent_domain_model` model for the parent domains. Also, `subdomain_model` is assumed to be the SQLAlchemy model for subdomains.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 7.187678247999429,
+    "time_to_first_token_s": 0.3389695269997901,
+    "total_duration_s": 7.178857261,
+    "load_duration_s": 0.253119624,
+    "prompt_eval_count": 69,
+    "prompt_eval_duration_s": 0.070351,
+    "eval_count": 240,
+    "eval_duration_s": 6.848777,
+    "tokens_per_second": 35.04275288858142
+  },
+  "resource": {
+    "samples": 18,
+    "vram_used_mb": {
+      "avg": 5944.0,
+      "peak": 5944.0
+    },
+    "gpu_util_pct": {
+      "avg": 89.66666666666667,
+      "peak": 95.0
+    },
+    "power_draw_w": {
+      "avg": 124.72166666666665,
+      "peak": 129.55
+    },
+    "temperature_c": {
+      "avg": 75.55555555555556,
+      "peak": 76.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5766727597,
+    "size_vram_bytes": 5766727597,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q5_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

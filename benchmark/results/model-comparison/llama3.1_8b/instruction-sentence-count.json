@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b",
+  "prompt_id": "instruction-sentence-count",
+  "category": "instruction_following",
+  "timestamp": "2026-08-06T18:06:27.842624+00:00",
+  "request": {
+    "system": null,
+    "user": "Explain photosynthesis in exactly 3 sentences. Not 2, not 4 \u2014 exactly 3.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Photosynthesis is the process by which plants, algae, and some bacteria convert light energy from the sun into chemical energy in the form of glucose. This process occurs in specialized organelles called chloroplasts, where pigments such as chlorophyll absorb the sunlight and use it to fuel a series of chemical reactions that produce glucose. As a byproduct of photosynthesis, oxygen is released into the atmosphere, which is essential for the survival of most living organisms on Earth.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 2.737679744000161,
+    "time_to_first_token_s": 0.31878343600055814,
+    "total_duration_s": 2.729405637,
+    "load_duration_s": 0.258712644,
+    "prompt_eval_count": 32,
+    "prompt_eval_duration_s": 0.046708,
+    "eval_count": 96,
+    "eval_duration_s": 2.419002,
+    "tokens_per_second": 39.68578777528915
+  },
+  "resource": {
+    "samples": 7,
+    "vram_used_mb": {
+      "avg": 5279.0,
+      "peak": 5279.0
+    },
+    "gpu_util_pct": {
+      "avg": 88.85714285714286,
+      "peak": 95.0
+    },
+    "power_draw_w": {
+      "avg": 104.73,
+      "peak": 122.15
+    },
+    "temperature_c": {
+      "avg": 58.857142857142854,
+      "peak": 61.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5020141485,
+    "size_vram_bytes": 5020141485,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

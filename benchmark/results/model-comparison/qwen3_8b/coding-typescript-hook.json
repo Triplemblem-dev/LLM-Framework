@@ -1,0 +1,58 @@
+{
+  "model": "qwen3:8b",
+  "prompt_id": "coding-typescript-hook",
+  "category": "coding",
+  "timestamp": "2026-08-06T18:11:35.766972+00:00",
+  "request": {
+    "system": null,
+    "user": "Write a TypeScript React (Next.js client component) hook `useDomains(token: string)` that fetches `GET /domains` with a Bearer token, handles loading/error state, and returns `{ domains, loading, error }`. Just the code.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Here's a TypeScript React hook (`useDomains`) for a Next.js client component that fetches data from a `/domains` endpoint using a Bearer token. It includes loading and error states, and returns an object with `domains`, `loading`, and `error`.\n\n```tsx\nimport { useState, useEffect } from 'react';\n\ninterface Domain {\n  id: string;\n  name: string;\n  // Add other properties as needed based on your API response\n}\n\nexport const useDomains = (token: string) => {\n  const [domains, setDomains] = useState<Domain[]>([]);\n  const [loading, setLoading] = useState<boolean>(true);\n  const [error, setError] = useState<string | null>(null);\n\n  useEffect(() => {\n    const fetchDomains = async () => {\n      setLoading(true);\n      setError(null);\n\n      try {\n        const response = await fetch('/api/domains', {\n          headers: {\n            Authorization: `Bearer ${token}`,\n          },\n        });\n\n        if (!response.ok) {\n          throw new Error('Failed to fetch domains');\n        }\n\n        const data = await response.json();\n        setDomains(data);\n      } catch (err) {\n        setError(err instanceof Error ? err.message : 'An error occurred');\n      } finally {\n        setLoading(false);\n      }\n    };\n\n    fetchDomains();\n  }, [token]);\n\n  return { domains, loading, error };\n};\n```\n\n### Notes:\n- This hook assumes your Next.js app has an API route at `/api/domains` that handles the `GET /domains` request.\n- You can adjust the `Domain` interface based on your actual API response.\n- If you're using Next.js App Router, ensure that your API route is correctly set up.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 9.447990286999811,
+    "time_to_first_token_s": 0.2953966160002892,
+    "total_duration_s": 9.440234607,
+    "load_duration_s": 0.206765164,
+    "prompt_eval_count": 67,
+    "prompt_eval_duration_s": 0.062473,
+    "eval_count": 355,
+    "eval_duration_s": 9.152565,
+    "tokens_per_second": 38.786941147099206
+  },
+  "resource": {
+    "samples": 23,
+    "vram_used_mb": {
+      "avg": 5554.0,
+      "peak": 5554.0
+    },
+    "gpu_util_pct": {
+      "avg": 94.78260869565217,
+      "peak": 99.0
+    },
+    "power_draw_w": {
+      "avg": 127.27478260869566,
+      "peak": 129.84
+    },
+    "temperature_c": {
+      "avg": 75.8695652173913,
+      "peak": 76.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5295172484,
+    "size_vram_bytes": 5295172484,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.2B"
+  },
+  "error": null
+}

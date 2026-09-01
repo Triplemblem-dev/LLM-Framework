@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b",
+  "prompt_id": "coding-pgvector-query",
+  "category": "coding",
+  "timestamp": "2026-08-06T18:07:35.987310+00:00",
+  "request": {
+    "system": null,
+    "user": "Write a PostgreSQL query using pgvector that finds the 5 nearest chunks to a given embedding vector `:query_embedding`, restricted to `domain_id = :domain_id`, ordered by cosine distance, using the `<=>` operator.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Here is the PostgreSQL query using pgvector:\n```sql\nSELECT v.*\nFROM chunks c\nJOIN vector_column vc ON (c.id <=> vc.chunk_id)\nWHERE domain_id = :domain_id\nORDER BY vc.vector <-> :query_embedding DESC\nLIMIT 5;\n```\nNote: The `<=>` operator is used to join the `chunks` table with the `vector_column` table, and then order by the cosine distance between the vectors in `vector_column` and `:query_embedding`.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 2.8928766330000144,
+    "time_to_first_token_s": 0.3426225089997388,
+    "total_duration_s": 2.884374839,
+    "load_duration_s": 0.264120396,
+    "prompt_eval_count": 56,
+    "prompt_eval_duration_s": 0.058856,
+    "eval_count": 102,
+    "eval_duration_s": 2.550191,
+    "tokens_per_second": 39.99700414596397
+  },
+  "resource": {
+    "samples": 7,
+    "vram_used_mb": {
+      "avg": 5278.0,
+      "peak": 5278.0
+    },
+    "gpu_util_pct": {
+      "avg": 87.28571428571429,
+      "peak": 95.0
+    },
+    "power_draw_w": {
+      "avg": 118.80999999999999,
+      "peak": 128.74
+    },
+    "temperature_c": {
+      "avg": 72.57142857142857,
+      "peak": 73.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5020141485,
+    "size_vram_bytes": 5020141485,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

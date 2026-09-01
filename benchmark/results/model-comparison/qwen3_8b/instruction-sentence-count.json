@@ -1,0 +1,58 @@
+{
+  "model": "qwen3:8b",
+  "prompt_id": "instruction-sentence-count",
+  "category": "instruction_following",
+  "timestamp": "2026-08-06T18:10:01.811575+00:00",
+  "request": {
+    "system": null,
+    "user": "Explain photosynthesis in exactly 3 sentences. Not 2, not 4 \u2014 exactly 3.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Photosynthesis is the process by which plants, algae, and some bacteria convert light energy into chemical energy. During this process, carbon dioxide and water are transformed into glucose and oxygen using sunlight as the energy source. This essential reaction sustains life on Earth by producing oxygen and forming the base of the food chain.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 1.8707969240003877,
+    "time_to_first_token_s": 0.2755618080000204,
+    "total_duration_s": 1.863101589,
+    "load_duration_s": 0.21033836,
+    "prompt_eval_count": 38,
+    "prompt_eval_duration_s": 0.052205,
+    "eval_count": 63,
+    "eval_duration_s": 1.595162,
+    "tokens_per_second": 39.49442125627366
+  },
+  "resource": {
+    "samples": 5,
+    "vram_used_mb": {
+      "avg": 5552.0,
+      "peak": 5552.0
+    },
+    "gpu_util_pct": {
+      "avg": 84.2,
+      "peak": 98.0
+    },
+    "power_draw_w": {
+      "avg": 106.83600000000001,
+      "peak": 129.49
+    },
+    "temperature_c": {
+      "avg": 71.6,
+      "peak": 73.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5295172484,
+    "size_vram_bytes": 5295172484,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.2B"
+  },
+  "error": null
+}

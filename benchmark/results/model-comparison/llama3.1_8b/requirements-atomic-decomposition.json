@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b",
+  "prompt_id": "requirements-atomic-decomposition",
+  "category": "requirements_engineering",
+  "timestamp": "2026-08-06T18:08:02.548599+00:00",
+  "request": {
+    "system": null,
+    "user": "Break this into atomic, individually testable requirements: \"The system should let users reset their password securely and be notified of the change.\"\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Here are the atomic, individually testable requirements broken down from the original statement:\n\n**1. The system allows users to initiate a password reset**\n\t* Test case: User attempts to reset password by clicking on \"Forgot Password\" link or button.\n\t* Expected result: System displays password reset form with required fields (e.g. email address).\n\n**2. The system sends a password reset email to the user's registered email address**\n\t* Test case: System generates and sends password reset email to a test user account.\n\t* Expected result: Email is delivered to the test user's inbox within a reasonable time frame (e.g. 1 minute).\n\t* Additional test cases:\n\t\t+ If the user's email address is invalid, system should not attempt to send an email.\n\n**3. The password reset email contains a secure link or token**\n\t* Test case: System generates and includes a secure link or token in the password reset email.\n\t* Expected result: Link/token is cryptographically secure and tamper-proof.\n\n**4. The user can enter their new password securely**\n\t* Test case: User attempts to set new password on the password reset page.\n\t* Expected result: System validates new password meets security requirements (e.g. length, complexity).\n\t* Additional test cases:\n\t\t+ If user enters an invalid password, system should display error message.\n\n**5. The system updates the user's password securely**\n\t* Test case: User successfully resets their password and attempts to log in with the new credentials.\n\t* Expected result: System authenticates user using the newly set password.\n\t* Additional test cases:\n\t\t+ If user attempts to reset password again without changing it, system should prevent duplicate updates.\n\n**6. The system notifies the user of the successful password change**\n\t* Test case: User resets their password and receives a notification (e.g. email, in-app message).\n\t* Expected result: System sends notification with confirmation of successful password change.\n\t* Additional test cases:\n\t\t+ If user's email address is invalid or system fails to send notification, user should still be able to log in with new credentials.\n\nBy breaking down the original requirement into these individual test cases, you can ensure that each component functions as intended and that the overall process of password reset is secure and reliable.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 12.36392870599957,
+    "time_to_first_token_s": 0.33284919899961096,
+    "total_duration_s": 12.355656062,
+    "load_duration_s": 0.261442187,
+    "prompt_eval_count": 37,
+    "prompt_eval_duration_s": 0.046218,
+    "eval_count": 476,
+    "eval_duration_s": 12.03099,
+    "tokens_per_second": 39.56449136770956
+  },
+  "resource": {
+    "samples": 30,
+    "vram_used_mb": {
+      "avg": 5278.0,
+      "peak": 5278.0
+    },
+    "gpu_util_pct": {
+      "avg": 91.1,
+      "peak": 95.0
+    },
+    "power_draw_w": {
+      "avg": 126.57233333333333,
+      "peak": 129.72
+    },
+    "temperature_c": {
+      "avg": 74.0,
+      "peak": 75.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5020141485,
+    "size_vram_bytes": 5020141485,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

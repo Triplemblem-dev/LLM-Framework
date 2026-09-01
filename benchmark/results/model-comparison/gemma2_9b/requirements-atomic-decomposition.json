@@ -1,0 +1,58 @@
+{
+  "model": "gemma2:9b",
+  "prompt_id": "requirements-atomic-decomposition",
+  "category": "requirements_engineering",
+  "timestamp": "2026-08-06T18:14:08.227379+00:00",
+  "request": {
+    "system": null,
+    "user": "Break this into atomic, individually testable requirements: \"The system should let users reset their password securely and be notified of the change.\"\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Here's a breakdown into atomic, individually testable requirements:\n\n**1. User Authentication:**\n\n* **Requirement:** The system shall require valid user credentials (e.g., username or email) for initiating the password reset process.\n* **Test:**  Attempt to access the password reset functionality without providing any user information. Verify that the system prompts for valid credentials.\n\n**2. Reset Request Handling:**\n\n* **Requirement:** Upon submitting a password reset request, the system shall generate a unique, time-limited token. \n* **Test:** Submit a password reset request with valid user information. Verify that the system generates and provides a unique token (e.g., via email).\n\n**3. Token Delivery:**\n\n* **Requirement:** The system shall deliver the password reset token to the user through a secure channel (e.g., encrypted email).\n* **Test:** Submit a password reset request and check your inbox for an email containing the token. Verify that the email is from a trusted source and uses appropriate security measures.\n\n**4. Token Validation:**\n\n* **Requirement:** The system shall validate the received token against its database before allowing password changes.\n* **Test:**  Attempt to access the password reset page with an invalid or expired token. Verify that the system rejects the request.\n\n**5. Password Change Functionality:**\n\n* **Requirement:** The system shall allow users to set a new password using the provided token within the specified timeframe.\n* **Test:** Submit the password reset token and enter a valid new password. Verify that the system successfully updates the user's password.\n\n**6. Password Strength Validation:**\n\n* **Requirement:** The system shall enforce password strength policies (e.g., minimum length, complexity requirements).\n* **Test:** Attempt to set a weak password (e.g., short, easily guessed) and verify that the system rejects it with an appropriate error message.\n\n**7. Notification of Password Change:**\n\n* **Requirement:** The system shall notify the user upon successful completion of the password reset process.\n* **Test:** After successfully changing the password, verify that the system displays a confirmation message or sends a notification indicating the change.\n\n\nRemember: These are just examples. You'll need to tailor them to your specific system and its security requirements.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 15.443044394000026,
+    "time_to_first_token_s": 0.43591753900000185,
+    "total_duration_s": 15.435235839,
+    "load_duration_s": 0.3046916,
+    "prompt_eval_count": 37,
+    "prompt_eval_duration_s": 0.092705,
+    "eval_count": 475,
+    "eval_duration_s": 15.006795,
+    "tokens_per_second": 31.652328162009276
+  },
+  "resource": {
+    "samples": 37,
+    "vram_used_mb": {
+      "avg": 6503.216216216216,
+      "peak": 6510.0
+    },
+    "gpu_util_pct": {
+      "avg": 88.97297297297297,
+      "peak": 92.0
+    },
+    "power_draw_w": {
+      "avg": 110.48486486486486,
+      "peak": 113.06
+    },
+    "temperature_c": {
+      "avg": 71.94594594594595,
+      "peak": 72.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5931542772,
+    "size_vram_bytes": 5931542772,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_0",
+    "parameter_size": "9.2B"
+  },
+  "error": null
+}

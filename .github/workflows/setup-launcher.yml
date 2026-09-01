@@ -1,0 +1,178 @@
+name: Setup launcher
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "v*"
+    paths:
+      - "setup_launcher/**"
+      - "docker-compose.yml"
+      - "docker-compose.gpu.yml"
+      - "backend/**"
+      - "frontend/**"
+      - ".github/workflows/setup-launcher.yml"
+  pull_request:
+    paths:
+      - "setup_launcher/**"
+      - "docker-compose.yml"
+      - ".github/workflows/setup-launcher.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Unit tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025, macos-14]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Run launcher tests
+        env:
+          PYTHONPATH: setup_launcher
+        run: python setup_launcher/run_ci_tests.py
+
+  build:
+    name: Build (${{ matrix.artifact }})
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            artifact: linux-x64
+          - os: windows-2025
+            artifact: windows-x64
+          - os: macos-14
+            artifact: macos-universal
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: setup_launcher/requirements-build.txt
+      - name: Install pinned packager
+        run: python -m pip install -r setup_launcher/requirements-build.txt
+      - name: Generate production-file integrity manifest
+        run: python setup_launcher/generate_integrity_manifest.py
+      - name: Build Windows launcher
+        if: runner.os == 'Windows'
+        run: >-
+          python -m PyInstaller --noconfirm --clean --onefile --windowed
+          --version-file setup_launcher/windows-version.txt
+          --add-data "setup_launcher/generated/integrity.json;setup_launcher/generated"
+          --name LLM-Framework-Setup setup_launcher/main.py
+      - name: Build Linux launcher
+        if: runner.os == 'Linux'
+        run: >-
+          python -m PyInstaller --noconfirm --clean --onefile --windowed
+          --add-data "setup_launcher/generated/integrity.json:setup_launcher/generated"
+          --name LLM-Framework-Setup setup_launcher/main.py
+      - name: Build macOS application bundle
+        if: runner.os == 'macOS'
+        run: python -m PyInstaller --noconfirm --clean setup_launcher/macos.spec
+      - name: Create clean production bundle
+        shell: python {0}
+        run: |
+          import pathlib
+          import shutil
+          import subprocess
+          import sys
+
+          root = pathlib.Path.cwd()
+          archive = root / "production-source.zip"
+          bundle = root / "bundle"
+          subprocess.run(
+              ["git", "archive", "--format=zip", "--output", str(archive), "HEAD"],
+              check=True,
+          )
+          shutil.unpack_archive(archive, bundle)
+          candidates = (
+              [root / "dist" / "LLM-Framework-Setup.app"]
+              if sys.platform == "darwin"
+              else [root / "dist" / "LLM-Framework-Setup.exe"]
+              if sys.platform == "win32"
+              else [root / "dist" / "LLM-Framework-Setup"]
+          )
+          source = next((candidate for candidate in candidates if candidate.exists()), None)
+          if source is None:
+              raise SystemExit("PyInstaller artifact not found")
+          target = bundle / source.name
+          if source.is_dir():
+              shutil.copytree(source, target)
+          else:
+              shutil.copy2(source, target)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: llm-framework-${{ matrix.artifact }}
+          path: bundle
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish GitHub release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: downloaded-artifacts
+      - name: Create user downloads and checksums
+        shell: python {0}
+        run: |
+          import hashlib
+          import pathlib
+          import shutil
+
+          root = pathlib.Path("downloaded-artifacts")
+          output = pathlib.Path("release-assets")
+          output.mkdir()
+          names = {
+              "llm-framework-windows-x64": "LLM-Framework-Windows-x64",
+              "llm-framework-macos-universal": "LLM-Framework-macOS-Universal",
+              "llm-framework-linux-x64": "LLM-Framework-Linux-x64",
+          }
+          archives = []
+          for artifact, public_name in names.items():
+              source = root / artifact
+              if not source.is_dir():
+                  raise SystemExit(f"missing build artifact: {artifact}")
+              archive = pathlib.Path(
+                  shutil.make_archive(str(output / public_name), "zip", source)
+              )
+              archives.append(archive)
+
+          checksum_file = output / "SHA256SUMS.txt"
+          checksum_file.write_text(
+              "".join(
+                  f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}\n"
+                  for path in archives
+              ),
+              encoding="utf-8",
+          )
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "$GITHUB_REF_NAME"
+          release-assets/LLM-Framework-Windows-x64.zip
+          release-assets/LLM-Framework-macOS-Universal.zip
+          release-assets/LLM-Framework-Linux-x64.zip
+          release-assets/SHA256SUMS.txt
+          --verify-tag
+          --generate-notes
+          --title "LLM Framework $GITHUB_REF_NAME"

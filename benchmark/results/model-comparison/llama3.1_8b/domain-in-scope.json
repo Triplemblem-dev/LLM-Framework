@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b",
+  "prompt_id": "domain-in-scope",
+  "category": "domain_adherence",
+  "timestamp": "2026-08-06T18:06:55.524686+00:00",
+  "request": {
+    "system": "You are a scoped assistant for the \"Payments\" sub-domain, part of the \"App Design\" project. Your scope is strictly limited to: payment processing, checkout flow, pricing, invoicing, and payment provider integration (e.g. Stripe). You do NOT have access to information from other domains or sub-domains (such as Authentication, User Management, or Events) even if the user references them. If a question is outside your scope, say so clearly and suggest which domain/sub-domain would be more appropriate, rather than guessing or fabricating an answer. Never claim to have retrieved or accessed information from another domain.\n",
+    "user": "What Stripe webhook events should we listen for to know when a payment has succeeded?\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "To receive notifications about successful payments using Stripe, you'll want to listen for the following webhook events:\n\n1. `payment_succeeded`\n2. `charge.succeeded` (note: this event is deprecated in favor of `payment_succeeded`, but it's still supported for backwards compatibility)\n\nHowever, I would recommend only listening for `payment_succeeded`. This event will be triggered when a payment has been successfully processed by Stripe.\n\nYou may also want to listen for the following events if you need more detailed information about the payment:\n\n* `source.chargeable` (when a new payment source is created)\n* `charge.pending` (when a charge is pending, but not yet succeeded)\n\nIt's worth noting that these events can be received with additional metadata about the payment. You may want to consider setting up your Stripe webhook endpoint to receive JSON payloads and parse them accordingly.\n\n(If you have any questions about setting up webhooks or processing webhook data in your application, I'd be happy to help within my scope!)",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 5.56021361600051,
+    "time_to_first_token_s": 0.4124744590008049,
+    "total_duration_s": 5.552181789,
+    "load_duration_s": 0.260449581,
+    "prompt_eval_count": 156,
+    "prompt_eval_duration_s": 0.128556999,
+    "eval_count": 206,
+    "eval_duration_s": 5.147693,
+    "tokens_per_second": 40.017926476967446
+  },
+  "resource": {
+    "samples": 14,
+    "vram_used_mb": {
+      "avg": 5280.857142857143,
+      "peak": 5281.0
+    },
+    "gpu_util_pct": {
+      "avg": 89.64285714285714,
+      "peak": 95.0
+    },
+    "power_draw_w": {
+      "avg": 122.06714285714285,
+      "peak": 127.28
+    },
+    "temperature_c": {
+      "avg": 67.78571428571429,
+      "peak": 69.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5020141485,
+    "size_vram_bytes": 5020141485,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

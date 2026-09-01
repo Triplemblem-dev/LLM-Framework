@@ -1,0 +1,58 @@
+{
+  "model": "gemma2:9b",
+  "prompt_id": "coding-typescript-hook",
+  "category": "coding",
+  "timestamp": "2026-08-06T18:13:46.362637+00:00",
+  "request": {
+    "system": null,
+    "user": "Write a TypeScript React (Next.js client component) hook `useDomains(token: string)` that fetches `GET /domains` with a Bearer token, handles loading/error state, and returns `{ domains, loading, error }`. Just the code.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "```typescript\nimport { useState, useEffect } from 'react';\n\nexport const useDomains = (token: string) => {\n  const [domains, setDomains] = useState<string[]>([]);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState<string | null>(null);\n\n  useEffect(() => {\n    const fetchData = async () => {\n      try {\n        setLoading(true);\n        const res = await fetch('/domains', {\n          headers: {\n            Authorization: `Bearer ${token}`,\n          },\n        });\n        if (!res.ok) {\n          throw new Error(`HTTP error! status: ${res.status}`);\n        }\n        const data = await res.json();\n        setDomains(data);\n      } catch (err) {\n        setError((err as Error).message);\n      } finally {\n        setLoading(false);\n      }\n    };\n\n    fetchData();\n  }, [token]);\n\n  return { domains, loading, error };\n};\n```",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 7.723082412000622,
+    "time_to_first_token_s": 0.4367121169998427,
+    "total_duration_s": 7.715453351,
+    "load_duration_s": 0.274955905,
+    "prompt_eval_count": 63,
+    "prompt_eval_duration_s": 0.108837,
+    "eval_count": 232,
+    "eval_duration_s": 7.286177,
+    "tokens_per_second": 31.841115031929636
+  },
+  "resource": {
+    "samples": 19,
+    "vram_used_mb": {
+      "avg": 6510.0,
+      "peak": 6510.0
+    },
+    "gpu_util_pct": {
+      "avg": 86.57894736842105,
+      "peak": 93.0
+    },
+    "power_draw_w": {
+      "avg": 108.90315789473684,
+      "peak": 112.22
+    },
+    "temperature_c": {
+      "avg": 71.84210526315789,
+      "peak": 72.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5931542772,
+    "size_vram_bytes": 5931542772,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_0",
+    "parameter_size": "9.2B"
+  },
+  "error": null
+}

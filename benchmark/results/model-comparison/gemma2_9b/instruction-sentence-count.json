@@ -1,0 +1,58 @@
+{
+  "model": "gemma2:9b",
+  "prompt_id": "instruction-sentence-count",
+  "category": "instruction_following",
+  "timestamp": "2026-08-06T18:12:19.023361+00:00",
+  "request": {
+    "system": null,
+    "user": "Explain photosynthesis in exactly 3 sentences. Not 2, not 4 \u2014 exactly 3.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Photosynthesis is the process by which plants convert light energy into chemical energy.  Chlorophyll, a pigment in plant cells, absorbs sunlight and uses it to power the conversion of carbon dioxide and water into glucose, a sugar that stores energy. This process releases oxygen as a byproduct, making photosynthesis essential for life on Earth. \n\n\n",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 2.4583678220005822,
+    "time_to_first_token_s": 0.37993398500020703,
+    "total_duration_s": 2.450796732,
+    "load_duration_s": 0.267951174,
+    "prompt_eval_count": 30,
+    "prompt_eval_duration_s": 0.089562,
+    "eval_count": 67,
+    "eval_duration_s": 2.078487,
+    "tokens_per_second": 32.234986314564395
+  },
+  "resource": {
+    "samples": 6,
+    "vram_used_mb": {
+      "avg": 6510.0,
+      "peak": 6510.0
+    },
+    "gpu_util_pct": {
+      "avg": 85.83333333333333,
+      "peak": 92.0
+    },
+    "power_draw_w": {
+      "avg": 95.86666666666667,
+      "peak": 111.89
+    },
+    "temperature_c": {
+      "avg": 70.33333333333333,
+      "peak": 71.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5931542772,
+    "size_vram_bytes": 5931542772,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_0",
+    "parameter_size": "9.2B"
+  },
+  "error": null
+}

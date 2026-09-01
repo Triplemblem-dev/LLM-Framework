@@ -1,0 +1,58 @@
+{
+  "model": "qwen2.5-coder:7b",
+  "prompt_id": "instruction-sentence-count",
+  "category": "instruction_following",
+  "timestamp": "2026-08-06T18:08:18.160020+00:00",
+  "request": {
+    "system": null,
+    "user": "Explain photosynthesis in exactly 3 sentences. Not 2, not 4 \u2014 exactly 3.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Photosynthesis is the process by which plants, algae, and some bacteria convert light energy from the sun into chemical energy stored in glucose. This conversion occurs primarily in the leaves of plants, where chlorophyll captures sunlight, initiating a series of reactions that transform water and carbon dioxide into sugar and oxygen. The energy-rich sugar provides the plant with fuel for growth and development, while the oxygen is released into the atmosphere as a byproduct.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 2.39136856299956,
+    "time_to_first_token_s": 0.2644035880002775,
+    "total_duration_s": 2.383703962,
+    "load_duration_s": 0.208040953,
+    "prompt_eval_count": 51,
+    "prompt_eval_duration_s": 0.043931,
+    "eval_count": 88,
+    "eval_duration_s": 2.126947999,
+    "tokens_per_second": 41.373837085520584
+  },
+  "resource": {
+    "samples": 6,
+    "vram_used_mb": {
+      "avg": 4916.0,
+      "peak": 4916.0
+    },
+    "gpu_util_pct": {
+      "avg": 83.33333333333333,
+      "peak": 94.0
+    },
+    "power_draw_w": {
+      "avg": 105.555,
+      "peak": 127.38
+    },
+    "temperature_c": {
+      "avg": 72.33333333333333,
+      "peak": 73.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 4638040390,
+    "size_vram_bytes": 4638040390,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "7.6B"
+  },
+  "error": null
+}

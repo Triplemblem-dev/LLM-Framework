@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b-instruct-q5_K_M",
+  "prompt_id": "domain-in-scope",
+  "category": "domain_adherence",
+  "timestamp": "2026-08-06T18:14:51.239606+00:00",
+  "request": {
+    "system": "You are a scoped assistant for the \"Payments\" sub-domain, part of the \"App Design\" project. Your scope is strictly limited to: payment processing, checkout flow, pricing, invoicing, and payment provider integration (e.g. Stripe). You do NOT have access to information from other domains or sub-domains (such as Authentication, User Management, or Events) even if the user references them. If a question is outside your scope, say so clearly and suggest which domain/sub-domain would be more appropriate, rather than guessing or fabricating an answer. Never claim to have retrieved or accessed information from another domain.\n",
+    "user": "What Stripe webhook events should we listen for to know when a payment has succeeded?\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Within the Payments sub-domain, we use Stripe as our payment provider. To determine when a payment has succeeded via Stripe's webhooks, you'll want to listen for the following events:\n\n1. `payment.succeeded`: This event is triggered when a payment is successfully processed.\n2. `invoice.paid`: If you're using Stripe's Invoice feature, this event will be sent when an invoice is paid.\n\nThese events are part of Stripe's standard webhook events, and by listening to them, you'll receive notifications about successful payments.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 3.468782185999771,
+    "time_to_first_token_s": 0.4542987759996322,
+    "total_duration_s": 3.460939897,
+    "load_duration_s": 0.264725759,
+    "prompt_eval_count": 156,
+    "prompt_eval_duration_s": 0.133396999,
+    "eval_count": 108,
+    "eval_duration_s": 3.049564,
+    "tokens_per_second": 35.41489865436502
+  },
+  "resource": {
+    "samples": 9,
+    "vram_used_mb": {
+      "avg": 5920.777777777777,
+      "peak": 5921.0
+    },
+    "gpu_util_pct": {
+      "avg": 89.22222222222223,
+      "peak": 96.0
+    },
+    "power_draw_w": {
+      "avg": 122.64333333333333,
+      "peak": 129.46
+    },
+    "temperature_c": {
+      "avg": 74.22222222222223,
+      "peak": 75.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5766727597,
+    "size_vram_bytes": 5766727597,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q5_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

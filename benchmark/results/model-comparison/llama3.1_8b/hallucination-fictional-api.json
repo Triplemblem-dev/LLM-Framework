@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b",
+  "prompt_id": "hallucination-fictional-api",
+  "category": "hallucination_resistance",
+  "timestamp": "2026-08-06T18:07:10.403959+00:00",
+  "request": {
+    "system": null,
+    "user": "In FastAPI, how do I use the `app.enable_quantum_routing()` method to speed up route resolution?\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "FastAPI does not have a built-in feature called \"quantum routing\" that can be enabled using `app.enable_quantum_routing()`. It's possible you may be thinking of a hypothetical or fictional feature, or maybe there's some confusion with another library or framework.\n\nHowever, if you're interested in speeding up route resolution in FastAPI, here are a few suggestions:\n\n1. **Use the built-in support for automatic route generation**: FastAPI uses a clever automatic routing system that can generate routes based on function annotations and docstrings. This system is optimized for performance.\n2. **Use the `path` parameter**: When defining routes, use the `path` parameter to specify the URL path explicitly. For example:\n```python\nfrom fastapi import Path\n\n@app.get(\"/items/{item_id}\")\ndef read_item(item_id: int = Path(..., title=\"Item ID\", description=\"The ID of the item to retrieve\")):\n    # ...\n```\n3. **Use the `Route` object**: If you need more control over route definition, you can use the `Route` object from FastAPI. For example:\n```python\nfrom fastapi import Route\n\nroute = Route(\"/items/{item_id}\", methods=[\"GET\"], endpoint=read_item)\napp.include_router(route)\n```\n4. **Use caching**: You can use a caching library like Redis or Memcached to cache route resolution results, which can speed up subsequent requests.\n5. **Optimize your routes**: If you have many routes, try to organize them in a way that minimizes the number of route lookups required.\n\nRemember, these suggestions are for improving performance, but they don't involve anything related to \"quantum routing\".\n\nIf you're interested in exploring more advanced performance optimization techniques for FastAPI, I'd be happy to help!",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 9.710460197999964,
+    "time_to_first_token_s": 0.3268821640003807,
+    "total_duration_s": 9.701612756,
+    "load_duration_s": 0.263095139,
+    "prompt_eval_count": 33,
+    "prompt_eval_duration_s": 0.045803,
+    "eval_count": 368,
+    "eval_duration_s": 9.383499,
+    "tokens_per_second": 39.21778006263975
+  },
+  "resource": {
+    "samples": 24,
+    "vram_used_mb": {
+      "avg": 5278.0,
+      "peak": 5278.0
+    },
+    "gpu_util_pct": {
+      "avg": 93.08333333333333,
+      "peak": 96.0
+    },
+    "power_draw_w": {
+      "avg": 123.28791666666666,
+      "peak": 127.19
+    },
+    "temperature_c": {
+      "avg": 70.04166666666667,
+      "peak": 71.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5020141485,
+    "size_vram_bytes": 5020141485,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

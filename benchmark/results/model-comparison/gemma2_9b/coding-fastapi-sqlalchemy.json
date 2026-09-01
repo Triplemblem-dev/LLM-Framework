@@ -1,0 +1,58 @@
+{
+  "model": "gemma2:9b",
+  "prompt_id": "coding-fastapi-sqlalchemy",
+  "category": "coding",
+  "timestamp": "2026-08-06T18:13:28.902513+00:00",
+  "request": {
+    "system": null,
+    "user": "Write a FastAPI endpoint `POST /domains/{domain_id}/subdomains` that creates a sub-domain using SQLAlchemy (async session), enforces that the parent domain has no parent itself (two-level nesting only), and returns a 400 with a clear error if violated. Just the code.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "```python\nfrom fastapi import APIRouter, HTTPException, Depends\nfrom sqlalchemy.ext.asyncio import AsyncSession\n\nfrom your_models import Domain, Subdomain  # Import your models here\nfrom your_database import get_async_session  # Assuming you have a database setup\n\nrouter = APIRouter()\n\n@router.post(\"/domains/{domain_id}/subdomains\")\nasync def create_subdomain(\n    domain_id: int,\n    name: str,\n    session: AsyncSession = Depends(get_async_session)\n):\n    domain = session.query(Domain).filter(Domain.id == domain_id).first()\n\n    if not domain:\n        raise HTTPException(status_code=404, detail=\"Domain not found\")\n\n    parent_domain = domain.parent_domain\n    if parent_domain:\n        raise HTTPException(status_code=400, detail=\"Domains can only have one level of nesting.\")\n\n    subdomain = Subdomain(name=name, parent_domain=domain)\n    session.add(subdomain)\n    await session.commit()\n\n    return subdomain\n```\n\n\n**Explanation:**\n\n1. **Imports:** Includes necessary FastAPI and SQLAlchemy components. Replace `your_models` and `your_database` with your actual file names.\n\n2. **Router Setup:** Creates an APIRouter instance for handling the endpoint.\n\n3. **Endpoint Definition:** \n   - `@router.post(\"/domains/{domain_id}/subdomains\")`: Defines a POST endpoint at `/domains/{domain_id}/subdomains`. The `{domain_id}` is a path parameter captured as an integer.\n\n4. **Dependency Injection:** Uses `Depends(get_async_session)` to inject the asynchronous database session for interacting with your models.\n5. **Domain Retrieval and Validation:** \n   - Fetches the parent domain using its ID from the database.\n   - Raises a 404 HTTPException if the domain is not found.\n\n6. **Nesting Check:**\n   - Retrieves the parent of the parent domain (`parent_domain`). If it exists, raises a 400 HTTPException with an informative error message, as only two levels of nesting are allowed.\n\n7. **Subdomain Creation:**\n   - Creates a new `Subdomain` instance with the provided name and the fetched parent domain.\n   - Adds the subdomain to the database session.\n   - Commits the changes to persist the data.\n\n8. **Return Value:** Returns the newly created `Subdomain` object.\n\n\n\n**Remember:**\n\n- Replace `your_models` and `your_database` with your actual file names.\n- Ensure your models (`Domain`, `Subdomain`) are defined correctly in your SQLAlchemy project.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 19.448041403999923,
+    "time_to_first_token_s": 0.4108265169998049,
+    "total_duration_s": 19.440169364,
+    "load_duration_s": 0.266610456,
+    "prompt_eval_count": 74,
+    "prompt_eval_duration_s": 0.11836,
+    "eval_count": 601,
+    "eval_duration_s": 19.036962,
+    "tokens_per_second": 31.570163348542696
+  },
+  "resource": {
+    "samples": 47,
+    "vram_used_mb": {
+      "avg": 6510.0,
+      "peak": 6510.0
+    },
+    "gpu_util_pct": {
+      "avg": 89.48936170212765,
+      "peak": 92.0
+    },
+    "power_draw_w": {
+      "avg": 110.45212765957447,
+      "peak": 112.69
+    },
+    "temperature_c": {
+      "avg": 71.87234042553192,
+      "peak": 72.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5931542772,
+    "size_vram_bytes": 5931542772,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_0",
+    "parameter_size": "9.2B"
+  },
+  "error": null
+}

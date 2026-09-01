@@ -1,0 +1,58 @@
+{
+  "model": "gemma2:9b",
+  "prompt_id": "language-technical-dutch",
+  "category": "language",
+  "timestamp": "2026-08-06T18:13:52.775935+00:00",
+  "request": {
+    "system": null,
+    "user": "Leg in het Nederlands uit wat een \"message queue\" is in de context van backend-systemen, zonder de Engelse term steeds opnieuw te vertalen op een verwarrende manier.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Een berichtenwachtrij is een systeem dat berichten tijdelijk opslaat totdat ze worden opgevraagd en verwerkt door een ander onderdeel van het backend-systeem.  \n\nStel je voor: je hebt twee programma's die met elkaar moeten communiceren. De ene programme maakt een bericht klaar, maar de andere is misschien nog druk bezig met iets anders. In plaats dat de eerste programme wacht tot de tweede klaar is, legt hij het bericht in de berichtenwachtrij. De tweede programme kijkt later naar de wachtrij en haalt het bericht eruit om te verwerken.\n\nZo wordt voorkomen dat programma's na elkaar wachten en kan elk onderdeel van het systeem zijn eigen taken uitvoeren zonder constant op elkaar te moeten letten.\n\n\n",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 5.205634364000616,
+    "time_to_first_token_s": 0.3851957700007915,
+    "total_duration_s": 5.197751008,
+    "load_duration_s": 0.265979458,
+    "prompt_eval_count": 48,
+    "prompt_eval_duration_s": 0.098598,
+    "eval_count": 155,
+    "eval_duration_s": 4.820831,
+    "tokens_per_second": 32.15213310734187
+  },
+  "resource": {
+    "samples": 13,
+    "vram_used_mb": {
+      "avg": 6510.0,
+      "peak": 6510.0
+    },
+    "gpu_util_pct": {
+      "avg": 88.3076923076923,
+      "peak": 93.0
+    },
+    "power_draw_w": {
+      "avg": 107.02999999999999,
+      "peak": 113.12
+    },
+    "temperature_c": {
+      "avg": 71.84615384615384,
+      "peak": 72.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5931542772,
+    "size_vram_bytes": 5931542772,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_0",
+    "parameter_size": "9.2B"
+  },
+  "error": null
+}

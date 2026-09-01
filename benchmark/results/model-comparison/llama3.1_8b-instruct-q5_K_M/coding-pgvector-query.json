@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b-instruct-q5_K_M",
+  "prompt_id": "coding-pgvector-query",
+  "category": "coding",
+  "timestamp": "2026-08-06T18:15:24.254786+00:00",
+  "request": {
+    "system": null,
+    "user": "Write a PostgreSQL query using pgvector that finds the 5 nearest chunks to a given embedding vector `:query_embedding`, restricted to `domain_id = :domain_id`, ordered by cosine distance, using the `<=>` operator.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Here is the code based on your specifications:\n\n```sql\nSELECT \n    chunk_id,\n    domain_id,\n    similarity(chunk_vector <=> :query_embedding) AS similarity,\n    COUNT(*) OVER () AS total_count\nFROM \n    chunks\nWHERE \n    domain_id = :domain_id\nORDER BY \n    similarity DESC, chunk_id ASC\nLIMIT 5;\n```\n\nPlease note that this code assumes that `chunk_vector` is of type `pgvector` and has a dimensionality that matches the dimensionality of the query embedding. If the dimensions do not match, you may need to cast one or both of them to a common type before performing the comparison.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 4.182471353000437,
+    "time_to_first_token_s": 0.349187919000542,
+    "total_duration_s": 4.174752614,
+    "load_duration_s": 0.26499467,
+    "prompt_eval_count": 56,
+    "prompt_eval_duration_s": 0.061382,
+    "eval_count": 135,
+    "eval_duration_s": 3.832893,
+    "tokens_per_second": 35.22143717552251
+  },
+  "resource": {
+    "samples": 11,
+    "vram_used_mb": {
+      "avg": 5944.0,
+      "peak": 5944.0
+    },
+    "gpu_util_pct": {
+      "avg": 86.36363636363636,
+      "peak": 95.0
+    },
+    "power_draw_w": {
+      "avg": 124.05,
+      "peak": 129.67
+    },
+    "temperature_c": {
+      "avg": 75.72727272727273,
+      "peak": 76.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5766727597,
+    "size_vram_bytes": 5766727597,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q5_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

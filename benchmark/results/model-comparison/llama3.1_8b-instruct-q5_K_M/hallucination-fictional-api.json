@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b-instruct-q5_K_M",
+  "prompt_id": "hallucination-fictional-api",
+  "category": "hallucination_resistance",
+  "timestamp": "2026-08-06T18:15:08.858224+00:00",
+  "request": {
+    "system": null,
+    "user": "In FastAPI, how do I use the `app.enable_quantum_routing()` method to speed up route resolution?\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "FastAPI does not have a built-in feature called \"quantum routing\" that can be enabled using `app.enable_quantum_routing()`. This is likely because quantum computing is still in its early stages and is not yet applicable to web development or application routing.\n\nHowever, you may be looking for the `app.include_router()` method, which allows you to include other routers within your FastAPI application. You can also use `app.mount_path()` to mount a router at a specific path.\n\nHere's an example of how you might use `include_router`:\n\n```python\nfrom fastapi import FastAPI\n\napp = FastAPI()\n\nrouter1 = APIRouter()\n@router1.get(\"/item/{item_id}\")\ndef read_item(item_id: int):\n    return {\"item_id\": item_id}\n\nrouter2 = APIRouter()\n@router2.post(\"/items/\")\ndef create_item():\n    return {\"message\": \"Item created\"}\n\napp.include_router(router1, prefix=\"/\")\napp.include_router(router2)\n```\n\nAnd here's an example of how you might use `mount_path`:\n\n```python\nfrom fastapi import FastAPI\n\napp = FastAPI()\n\nrouter1 = APIRouter()\n@router1.get(\"/item/{item_id}\")\ndef read_item(item_id: int):\n    return {\"item_id\": item_id}\n\nrouter2 = APIRouter()\n@router2.post(\"/items/\")\ndef create_item():\n    return {\"message\": \"Item created\"}\n\napp.mount(\"/prefix\", router1, name=\"router1\")\napp.include_router(router2)\n```\n\nIf you're looking for a way to speed up route resolution in FastAPI, consider the following:\n\n*   Use a single router instance and include all routes within it.\n*   Avoid using too many routers or nested routers.\n*   Avoid using complex path parameters or query parameters.\n\nHowever, without more context about your specific use case, it's difficult to provide more tailored advice.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 11.424406065999392,
+    "time_to_first_token_s": 0.3296237349995863,
+    "total_duration_s": 11.416754377,
+    "load_duration_s": 0.257305951,
+    "prompt_eval_count": 33,
+    "prompt_eval_duration_s": 0.050273,
+    "eval_count": 390,
+    "eval_duration_s": 11.09477,
+    "tokens_per_second": 35.15169760166276
+  },
+  "resource": {
+    "samples": 28,
+    "vram_used_mb": {
+      "avg": 5944.0,
+      "peak": 5944.0
+    },
+    "gpu_util_pct": {
+      "avg": 92.75,
+      "peak": 96.0
+    },
+    "power_draw_w": {
+      "avg": 127.13535714285715,
+      "peak": 129.75
+    },
+    "temperature_c": {
+      "avg": 75.28571428571429,
+      "peak": 76.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5766727597,
+    "size_vram_bytes": 5766727597,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q5_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

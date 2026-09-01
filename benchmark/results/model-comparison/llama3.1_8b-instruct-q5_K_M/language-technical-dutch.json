@@ -1,0 +1,58 @@
+{
+  "model": "llama3.1:8b-instruct-q5_K_M",
+  "prompt_id": "language-technical-dutch",
+  "category": "language",
+  "timestamp": "2026-08-06T18:15:44.616106+00:00",
+  "request": {
+    "system": null,
+    "user": "Leg in het Nederlands uit wat een \"message queue\" is in de context van backend-systemen, zonder de Engelse term steeds opnieuw te vertalen op een verwarrende manier.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Een message queue (ook wel bekend als een berichtenwachtrij) is een soort database die speciaal ontworpen is voor het opslaan en afhandelen van berichten, zoals meldingen, updates of andere gegevens. In de context van backend-systemen wordt deze technologie gebruikt om communicatie tussen verschillende componenten of processen te faciliteren.\n\nHieronder een korte uitleg hoe het werkt:\n\n1. **Meldingen worden ingevoerd**: Wanneer een bepaalde gebeurtenis plaatsvindt, zoals een bestelling wordt geplaatst in een webshop, wordt deze melding naar de message queue gestuurd.\n2. **Berichten worden opgeslagen**: De message queue slaat de melding op en bewaart deze tot het moment dat ze verwerkt kan worden.\n3. **Berichten worden afgehaald**: Een andere component of proces, zoals een worker-thread of een microservice, kan de meldingen vanuit de message queue afhalen en verwerken.\n\nDe voordelen van gebruikmaken van een message queue zijn:\n\n* **Gebroken proces isolatie**: Wanneer een bepaalde component of proces uitvalt, kunnen andere processen gewoon door blijven werken.\n* **Verhoogde schaalbaarheid**: Het kan gemakkelijker worden om nieuwe componenten toe te voegen om met het volume van meldingen om te gaan.\n* **Verbeterde prestaties**: De message queue kan de verwerking van berichten effici\u00ebnter maken door de belasting op de backend-systeem te verdelen.\n\nEen paar voorbeelden van systemen die gebruikmaken van message queues zijn:\n\n* Apache Kafka\n* Amazon SQS (Simple Queue Service)\n* RabbitMQ\n\nIn het algemeen kan een message queue worden gezien als een soort \"postbus\" waarin berichten kunnen worden gestuurd en afgehaald. Dit maakt het gemakkelijker om communicatie tussen verschillende componenten of processen te organiseren en te beheren.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 13.405303382999591,
+    "time_to_first_token_s": 0.3252542979998907,
+    "total_duration_s": 13.39749769,
+    "load_duration_s": 0.253950126,
+    "prompt_eval_count": 53,
+    "prompt_eval_duration_s": 0.057772,
+    "eval_count": 459,
+    "eval_duration_s": 13.079906,
+    "tokens_per_second": 35.09199530944642
+  },
+  "resource": {
+    "samples": 33,
+    "vram_used_mb": {
+      "avg": 5944.0,
+      "peak": 5944.0
+    },
+    "gpu_util_pct": {
+      "avg": 93.57575757575758,
+      "peak": 96.0
+    },
+    "power_draw_w": {
+      "avg": 127.30454545454546,
+      "peak": 129.89
+    },
+    "temperature_c": {
+      "avg": 75.87878787878788,
+      "peak": 76.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5766727597,
+    "size_vram_bytes": 5766727597,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q5_K_M",
+    "parameter_size": "8.0B"
+  },
+  "error": null
+}

@@ -1,0 +1,58 @@
+{
+  "model": "qwen2.5-coder:7b",
+  "prompt_id": "instruction-json-exact",
+  "category": "instruction_following",
+  "timestamp": "2026-08-06T18:08:15.760504+00:00",
+  "request": {
+    "system": null,
+    "user": "Respond with exactly a JSON object with keys \"a\", \"b\", \"c\" mapping to the numbers 1, 2, 3. Output ONLY the JSON object. No markdown code fences, no explanation, no extra text before or after.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "{\"a\":1,\"b\":2,\"c\":3}",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 3.936964814000021,
+    "time_to_first_token_s": 3.610301900000195,
+    "total_duration_s": 3.929098439,
+    "load_duration_s": 3.52207008,
+    "prompt_eval_count": 80,
+    "prompt_eval_duration_s": 0.077985,
+    "eval_count": 14,
+    "eval_duration_s": 0.326644,
+    "tokens_per_second": 42.860116824432716
+  },
+  "resource": {
+    "samples": 10,
+    "vram_used_mb": {
+      "avg": 2164.3,
+      "peak": 4916.0
+    },
+    "gpu_util_pct": {
+      "avg": 33.0,
+      "peak": 96.0
+    },
+    "power_draw_w": {
+      "avg": 53.33,
+      "peak": 120.17
+    },
+    "temperature_c": {
+      "avg": 65.6,
+      "peak": 71.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 4638040390,
+    "size_vram_bytes": 4638040390,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "7.6B"
+  },
+  "error": null
+}

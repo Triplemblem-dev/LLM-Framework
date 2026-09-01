@@ -1,0 +1,58 @@
+{
+  "model": "gemma2:9b",
+  "prompt_id": "coding-pgvector-query",
+  "category": "coding",
+  "timestamp": "2026-08-06T18:13:38.631318+00:00",
+  "request": {
+    "system": null,
+    "user": "Write a PostgreSQL query using pgvector that finds the 5 nearest chunks to a given embedding vector `:query_embedding`, restricted to `domain_id = :domain_id`, ordered by cosine distance, using the `<=>` operator.\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "```sql\nSELECT *\nFROM your_table\nWHERE domain_id = :domain_id AND\n  embedding <=> :query_embedding \nORDER BY embedding <=> :query_embedding LIMIT 5;\n```\n\n**Explanation:**\n\n* **your_table**: Replace this with the actual name of your table containing the `embedding` and `domain_id` columns.\n* **:domain_id**: This is a placeholder for the specific domain ID you are interested in. \n* **:query_embedding**:  This is a placeholder for the input embedding vector you want to compare against. Make sure it's formatted correctly for pgvector (e.g., as an array of floats).\n\n**Key Points:**\n\n* **`<=>` Operator:** This operator calculates the cosine similarity between two `pgvector` objects and returns:\n    *  A negative value if the first vector is less similar to the second.\n    *  Zero if the vectors are orthogonal (perpendicular).\n    *  A positive value if the first vector is more similar to the second.\n\n* **ORDER BY**: Ordering by `embedding <=> :query_embedding` will sort the results in ascending order of cosine distance, meaning the nearest vectors will come first.\n\n* **LIMIT 5**: This restricts the query output to the top 5 nearest chunks.\n\n\n\nLet me know if you have any other questions or need further assistance!",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 9.720503746999384,
+    "time_to_first_token_s": 0.4598079739998866,
+    "total_duration_s": 9.712687092,
+    "load_duration_s": 0.260867425,
+    "prompt_eval_count": 59,
+    "prompt_eval_duration_s": 0.107741,
+    "eval_count": 296,
+    "eval_duration_s": 9.260685,
+    "tokens_per_second": 31.963078325199483
+  },
+  "resource": {
+    "samples": 24,
+    "vram_used_mb": {
+      "avg": 6510.0,
+      "peak": 6510.0
+    },
+    "gpu_util_pct": {
+      "avg": 87.83333333333333,
+      "peak": 93.0
+    },
+    "power_draw_w": {
+      "avg": 109.93708333333332,
+      "peak": 113.62
+    },
+    "temperature_c": {
+      "avg": 71.91666666666667,
+      "peak": 72.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5931542772,
+    "size_vram_bytes": 5931542772,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_0",
+    "parameter_size": "9.2B"
+  },
+  "error": null
+}

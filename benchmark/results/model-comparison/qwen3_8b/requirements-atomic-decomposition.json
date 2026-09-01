@@ -1,0 +1,58 @@
+{
+  "model": "qwen3:8b",
+  "prompt_id": "requirements-atomic-decomposition",
+  "category": "requirements_engineering",
+  "timestamp": "2026-08-06T18:11:56.809521+00:00",
+  "request": {
+    "system": null,
+    "user": "Break this into atomic, individually testable requirements: \"The system should let users reset their password securely and be notified of the change.\"\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "Sure! Here's a breakdown of the requirement **\"The system should let users reset their password securely and be notified of the change.\"** into **atomic, individually testable requirements**:\n\n---\n\n### 1. **User can request a password reset**\n- The system allows users to initiate a password reset by providing their registered email address or username.\n- The system validates that the email/username exists in the system.\n\n---\n\n### 2. **System generates a unique password reset token**\n- The system generates a unique, time-sensitive token for the user's password reset request.\n- The token is stored securely in the database and associated with the user's account.\n\n---\n\n### 3. **User receives a password reset link via email**\n- The system sends an email to the user's registered email address containing a secure, time-limited password reset link.\n- The email includes the unique token and a link to a password reset page.\n\n---\n\n### 4. **User can reset their password using the reset link**\n- The system allows the user to reset their password by visiting the password reset link and entering a new password.\n- The system validates the token before allowing password change.\n\n---\n\n### 5. **User must confirm the new password meets security criteria**\n- The system enforces password complexity rules (e.g., minimum length, mix of characters, no common passwords).\n- The system validates that the new password meets the security criteria before allowing the change.\n\n---\n\n### 6. **System updates the user's password securely**\n- The system updates the user's password in the database using secure encryption (e.g., hashing with salt).\n- The system does not store the password in plain text.\n\n---\n\n### 7. **User is notified of the password change**\n- The system sends a confirmation email to the user's registered email address confirming that the password has been changed.\n- The confirmation email includes a summary of the action (e.g., \"Your password has been successfully changed\").\n\n---\n\n### 8. **System invalidates the reset token after use**\n- The system marks the password reset token as used or expires it after a set time period.\n- The system prevents reuse of the token after it has been used or expired.\n\n---\n\n### 9. **System logs password reset activity securely**\n- The system logs all password reset activity (e.g., IP address, timestamp, user ID, token used, etc.) for audit and security purposes.\n- The logs are stored securely and access is restricted to authorized personnel.\n\n---\n\n### 10. **System prevents brute-force attacks during password reset**\n- The system limits the number of password reset requests from the same IP or account within a given time period.\n- The system blocks or throttles repeated failed attempts to reset a password.\n\n---\n\nThese atomic requirements are individually testable and can be used to build and verify the functionality of a secure password reset feature.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 15.485255125000549,
+    "time_to_first_token_s": 0.2790847380001651,
+    "total_duration_s": 15.477609236,
+    "load_duration_s": 0.207466039,
+    "prompt_eval_count": 43,
+    "prompt_eval_duration_s": 0.052237,
+    "eval_count": 586,
+    "eval_duration_s": 15.206129,
+    "tokens_per_second": 38.53709251052651
+  },
+  "resource": {
+    "samples": 38,
+    "vram_used_mb": {
+      "avg": 5554.0,
+      "peak": 5554.0
+    },
+    "gpu_util_pct": {
+      "avg": 96.0,
+      "peak": 99.0
+    },
+    "power_draw_w": {
+      "avg": 128.5107894736842,
+      "peak": 129.9
+    },
+    "temperature_c": {
+      "avg": 75.97368421052632,
+      "peak": 76.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 5295172484,
+    "size_vram_bytes": 5295172484,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "8.2B"
+  },
+  "error": null
+}

@@ -1,0 +1,58 @@
+{
+  "model": "qwen2.5-coder:7b",
+  "prompt_id": "requirements-atomic-decomposition",
+  "category": "requirements_engineering",
+  "timestamp": "2026-08-06T18:09:46.269054+00:00",
+  "request": {
+    "system": null,
+    "user": "Break this into atomic, individually testable requirements: \"The system should let users reset their password securely and be notified of the change.\"\n",
+    "options": {
+      "num_ctx": 4096,
+      "temperature": 0.7
+    },
+    "think": false
+  },
+  "response": {
+    "content": "1. **Requirement:** The system must provide an interface or option for users to initiate a password reset process.\n2. **Requirement:** The system must generate and send a secure, unique token to the user's registered email address for authentication purposes.\n3. **Requirement:** The system must verify that the token provided by the user is valid and has not expired before allowing password change.\n4. **Requirement:** The system must prompt the user to enter a new password during the reset process.\n5. **Requirement:** The system must ensure that the new password meets the specified security criteria (e.g., length, complexity).\n6. **Requirement:** Upon successful verification of the token and validation of the new password, the system must update the user's password in the database securely.\n7. **Requirement:** The system must notify the user via email or another secure method that their password has been successfully changed.\n8. **Requirement:** The notification to the user should include a confirmation message indicating successful password reset.\n9. **Requirement:** The system must maintain logs of all password reset attempts for security auditing and monitoring purposes.\n10. **Requirement:** The system must prevent brute-force attacks on the password reset process by limiting the number of allowed attempts within a specified time frame.",
+    "thinking": null
+  },
+  "metrics": {
+    "wall_clock_total_s": 6.492196832000445,
+    "time_to_first_token_s": 0.3070445470002596,
+    "total_duration_s": 6.484414824,
+    "load_duration_s": 0.208489554,
+    "prompt_eval_count": 56,
+    "prompt_eval_duration_s": 0.044241,
+    "eval_count": 253,
+    "eval_duration_s": 6.1854,
+    "tokens_per_second": 40.90277104148479
+  },
+  "resource": {
+    "samples": 16,
+    "vram_used_mb": {
+      "avg": 4920.0,
+      "peak": 4920.0
+    },
+    "gpu_util_pct": {
+      "avg": 87.375,
+      "peak": 94.0
+    },
+    "power_draw_w": {
+      "avg": 124.81125,
+      "peak": 129.39
+    },
+    "temperature_c": {
+      "avg": 74.8125,
+      "peak": 75.0
+    }
+  },
+  "ollama_ps": {
+    "size_bytes": 4638040390,
+    "size_vram_bytes": 4638040390,
+    "gpu_pct": 100.0,
+    "context_length": 4096,
+    "quantization_level": "Q4_K_M",
+    "parameter_size": "7.6B"
+  },
+  "error": null
+}

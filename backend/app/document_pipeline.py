@@ -2,7 +2,7 @@
 
 Runs synchronously inside the upload request (Decision-equivalent to the rest of v1: no
 background job infra yet). Document.status/error record whether it worked so the frontend
-can show a failed upload instead of a silently-empty document.
+can distinguish a saved source file from one that is searchable by the model.
 """
 
 import hashlib
@@ -187,6 +187,13 @@ def process_document(db: Session, document: Document, data: bytes) -> None:
             batch = [d.content for d in drafts[i : i + EMBED_BATCH_SIZE]]
             embeddings.extend(embed(batch))
 
+        if len(embeddings) != len(drafts):
+            raise ValueError("Ollama returned fewer embeddings than the document requires.")
+
+        # A retry must replace any partial or stale index instead of appending
+        # duplicate chunks. Keep the existing rows until extraction and
+        # embedding both succeed so a failed retry cannot destroy usable data.
+        db.query(DocumentChunk).filter_by(document_id=document.id).delete(synchronize_session=False)
         for index, (draft, vector) in enumerate(zip(drafts, embeddings)):
             db.add(
                 DocumentChunk(
@@ -207,5 +214,6 @@ def process_document(db: Session, document: Document, data: bytes) -> None:
     except Exception as exc:  # noqa: BLE001 - convert any pipeline failure into a stored status
         db.rollback()
         document.status = DocumentStatus.failed
+        document.chunk_count = 0
         document.error = str(exc)[:2000]
         db.commit()

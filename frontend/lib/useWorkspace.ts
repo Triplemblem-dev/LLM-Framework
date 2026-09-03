@@ -949,10 +949,34 @@ export function useWorkspace() {
         if (doc.status === "ready") {
           pushToast(`${doc.filename} uploaded (${doc.chunkCount} chunks).`);
         } else {
-          pushToast(`${doc.filename}: ${doc.error ?? "processing failed"}`);
+          pushToast(`${doc.filename} was saved, but is not available to the model yet.`);
         }
       } catch (err) {
         reportError(err, "Could not upload document.");
+      }
+    },
+    [state.activeDomainId, state.activeSubdomainId, pushToast, reportError]
+  );
+
+  const reindexDocument = useCallback(
+    async (documentId: string) => {
+      const scopeId = state.activeSubdomainId ?? state.activeDomainId;
+      if (!scopeId) return false;
+      try {
+        const updated = await api.reindexDocument(scopeId, documentId);
+        setState((prev) => ({
+          ...prev,
+          documents: prev.documents.map((document) => document.id === updated.id ? updated : document),
+        }));
+        if (updated.status === "ready") {
+          pushToast(`${updated.filename} is now available to the model (${updated.chunkCount} chunks).`);
+          return true;
+        }
+        pushToast(`${updated.filename} is saved, but indexing still needs attention.`);
+        return false;
+      } catch (err) {
+        reportError(err, "Could not retry document indexing.");
+        return false;
       }
     },
     [state.activeDomainId, state.activeSubdomainId, pushToast, reportError]
@@ -1520,6 +1544,7 @@ export function useWorkspace() {
       previewPrompt,
       setPromptLayerEnabled,
       uploadDocument,
+      reindexDocument,
       deleteDocument,
       createDocumentMarkdown,
       previewDocument,

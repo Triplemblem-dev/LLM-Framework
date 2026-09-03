@@ -861,6 +861,13 @@ export async function deleteDocument(domainId: string, documentId: string): Prom
   await request(`/domains/${domainId}/documents/${documentId}`, { method: "DELETE" });
 }
 
+export async function reindexDocument(domainId: string, documentId: string): Promise<DocumentInfo> {
+  const raw = await request<any>(`/domains/${domainId}/documents/${documentId}/reindex`, {
+    method: "POST",
+  });
+  return mapDocument(raw);
+}
+
 export async function createDocumentMarkdown(domainId: string, documentId: string): Promise<DocumentInfo> {
   const raw = await request<any>(`/domains/${domainId}/documents/${documentId}/markdown`, {
     method: "POST",

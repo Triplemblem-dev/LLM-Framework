@@ -247,6 +247,15 @@ the copy can then be viewed or downloaded. It is linked to the source instead of
 being indexed a second time. See
 [`docs/pdf-to-markdown.md`](./docs/pdf-to-markdown.md).
 
+If a document is labelled **not indexed**, its source was saved and remains
+viewable, but chat cannot retrieve it yet. Make sure the configured embedding
+model is installed in Ollama, then choose **Retry indexing** beside the file.
+For bundled Ollama, run:
+
+```bash
+docker compose exec ollama ollama pull nomic-embed-text
+```
+
 ### Local code repository search
 
 Open a domain or sub-domain, choose the Documents tab, and select **Import

@@ -116,6 +116,14 @@ generates embeddings through the configured local Ollama embedding model, and
 stores vectors in pgvector. Chat retrieval selects approved excerpts for the
 active scope and records citations and retrieval evidence.
 
+Saving and indexing are reported separately. If Ollama is unavailable, the
+embedding model is missing, or indexing times out, the source file stays local
+and can still be viewed, but it is clearly labelled **not indexed** and is not
+sent to the chat model. The document row shows the actionable indexing error
+and a **Retry indexing** action. A retry reads the already saved source,
+replaces stale chunks only after extraction and embedding succeed, and does not
+require another upload.
+
 Documents have a **View** action. PDFs can also be converted to page-labelled
 Markdown. The Markdown companion is stored inside the same scope and virtual
 folder as its source, can be viewed or downloaded, and is linked to the source

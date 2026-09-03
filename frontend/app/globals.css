@@ -830,6 +830,8 @@ textarea, input { font-family: inherit; color: inherit; }
 .doc-file-stack > .doc-row:first-child { flex-wrap: wrap; }
 .doc-file-stack > .doc-row:first-child .doc-name-block { flex: 1 1 100%; }
 .doc-file-stack > .doc-row:first-child > .stub-badge { margin-right: auto; }
+.doc-index-error { display: grid; gap: 2px; margin: -1px 0 6px; padding: 7px 9px; color: var(--text-muted); background: color-mix(in srgb, var(--danger) 7%, transparent); border: 1px solid color-mix(in srgb, var(--danger) 25%, var(--border)); border-top: 0; border-radius: 0 0 6px 6px; font-size: var(--fs-2xs); line-height: 1.4; }
+.doc-index-error strong { color: var(--text); font-weight: 600; }
 .doc-folder-heading {
   margin: 0 1px 5px; color: var(--accent-strong); font: 650 var(--fs-2xs)/1.4 var(--font-mono); overflow-wrap: anywhere;
 }

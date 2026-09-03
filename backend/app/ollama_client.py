@@ -7,6 +7,10 @@ from app.config import settings
 from app.optimizer.activity import ordinary_activity
 
 
+class EmbeddingError(RuntimeError):
+    """An actionable failure while creating document-search embeddings."""
+
+
 def list_installed_models() -> list[dict]:
     resp = httpx.get(f"{settings.ollama_host}/api/tags", timeout=10)
     resp.raise_for_status()
@@ -21,10 +25,47 @@ def embed(texts: list[str]) -> list[list[float]]:
     if not texts:
         return []
     payload = {"model": settings.embedding_model, "input": texts}
-    with ordinary_activity("embedding"):
-        resp = httpx.post(f"{settings.ollama_host}/api/embed", json=payload, timeout=60)
-        resp.raise_for_status()
-        return resp.json()["embeddings"]
+    try:
+        with ordinary_activity("embedding"):
+            resp = httpx.post(
+                f"{settings.ollama_host}/api/embed",
+                json=payload,
+                timeout=httpx.Timeout(connect=10, read=300, write=30, pool=30),
+            )
+            resp.raise_for_status()
+        body = resp.json()
+        vectors = body.get("embeddings") if isinstance(body, dict) else None
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 404:
+            raise EmbeddingError(
+                f"Embedding model '{settings.embedding_model}' is not installed in Ollama. "
+                "Install it, then choose Retry indexing."
+            ) from None
+        raise EmbeddingError(
+            f"Ollama could not index this document (HTTP {exc.response.status_code}). "
+            "Check Ollama, then choose Retry indexing."
+        ) from None
+    except httpx.TimeoutException:
+        raise EmbeddingError(
+            "Ollama took too long to index this document. Check its CPU/GPU activity, "
+            "then choose Retry indexing."
+        ) from None
+    except httpx.RequestError:
+        raise EmbeddingError(
+            "The framework could not reach Ollama to index this document. "
+            "Start Ollama, then choose Retry indexing."
+        ) from None
+    except (ValueError, TypeError):
+        raise EmbeddingError("Ollama returned an invalid embedding response. Update Ollama, then retry indexing.") from None
+
+    if not isinstance(vectors, list) or len(vectors) != len(texts):
+        raise EmbeddingError("Ollama returned an incomplete embedding response. Choose Retry indexing.")
+    if any(not isinstance(vector, list) or len(vector) != settings.embedding_dimensions for vector in vectors):
+        raise EmbeddingError(
+            f"Embedding model '{settings.embedding_model}' returned the wrong vector size; "
+            f"this framework expects {settings.embedding_dimensions}."
+        )
+    return vectors
 
 
 def chat_structured(model_tag: str, messages: list[dict], schema: dict) -> dict:

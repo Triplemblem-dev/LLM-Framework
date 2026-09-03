@@ -165,6 +165,20 @@ def list_documents(domain_id: uuid.UUID, db: Session = Depends(get_db)):
     )
 
 
+@router.post("/{domain_id}/documents/{document_id}/reindex", response_model=DocumentOut)
+def reindex_document(
+    domain_id: uuid.UUID,
+    document_id: uuid.UUID,
+    db: Session = Depends(get_db),
+):
+    """Retry extraction and indexing without requiring another upload."""
+    doc = get_document_or_404(db, domain_id, document_id)
+    source = _validated_source_path(doc)
+    process_document(db, doc, source.read_bytes())
+    db.refresh(doc)
+    return doc
+
+
 @router.get("/{domain_id}/documents/inherited", response_model=list[InheritedDocumentOut])
 def list_inherited_documents(domain_id: uuid.UUID, db: Session = Depends(get_db)):
     """Read-only view of documents visible to this scope via inheritance/sibling-sharing but

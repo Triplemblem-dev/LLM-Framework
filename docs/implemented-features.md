@@ -51,6 +51,10 @@ including its verification and distribution boundaries.
   can also be viewed in-app and extracted into page-labelled Markdown stored in
   the same scope and virtual folder, then viewed or downloaded;
   see [PDF to Markdown](./pdf-to-markdown.md).
+- Document storage and model indexing have distinct UI states. A saved file
+  remains viewable after an indexing failure, is explicitly marked unavailable
+  to the model, shows an actionable Ollama error, and can be indexed again from
+  its existing local source with **Retry indexing**.
 - Local-model document organization with a recommended-or-explicit model
   choice, editable preview, virtual folder paths, tags, stale-preview
   protection, and explicit reviewed apply. Original files are not moved or

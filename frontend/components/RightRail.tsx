@@ -1791,7 +1791,7 @@ function Inspector({ ws, draft }: { ws: Workspace; draft: string }) {
 
 function statusLabel(status: DocumentStatus): string {
   if (status === "ready") return "ready";
-  if (status === "failed") return "failed";
+  if (status === "failed") return "not indexed";
   return "processing…";
 }
 
@@ -1813,6 +1813,7 @@ function DocumentsPanel({ ws }: { ws: Workspace }) {
   const previewRequestRef = useRef(0);
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [indexingDocumentId, setIndexingDocumentId] = useState<string | null>(null);
   const [exportingDocumentId, setExportingDocumentId] = useState<string | null>(null);
   const [preview, setPreview] = useState<DocumentPreview | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -1873,6 +1874,16 @@ function DocumentsPanel({ ws }: { ws: Workspace }) {
       await actions.createDocumentMarkdown(document.id);
     } finally {
       setExportingDocumentId(null);
+    }
+  }
+
+  async function retryIndexing(document: DocumentInfo) {
+    if (indexingDocumentId) return;
+    setIndexingDocumentId(document.id);
+    try {
+      await actions.reindexDocument(document.id);
+    } finally {
+      setIndexingDocumentId(null);
     }
   }
 
@@ -2110,6 +2121,18 @@ function DocumentsPanel({ ws }: { ws: Workspace }) {
                     {doc.status === "ready" ? ` · ${doc.chunkCount} chunks` : ""}
                   </span>
                   <span className="doc-actions">
+                    {doc.status === "failed" && (
+                      <button
+                        className="doc-export"
+                        disabled={indexingDocumentId !== null}
+                        onClick={() => retryIndexing(doc)}
+                        type="button"
+                        title="Try making this file available to the model again"
+                        aria-label={`Retry indexing ${doc.filename}`}
+                      >
+                        {indexingDocumentId === doc.id ? "Indexing…" : "Retry indexing"}
+                      </button>
+                    )}
                     <button
                       className="doc-export"
                       onClick={() => openPreview(doc)}
@@ -2142,6 +2165,12 @@ function DocumentsPanel({ ws }: { ws: Workspace }) {
                     </button>
                   </span>
                 </div>
+                {doc.status === "failed" && (
+                  <div className="doc-index-error" role="status">
+                    <strong>File saved; not available to the model.</strong>
+                    <span>{doc.error ?? "Document indexing did not finish."}</span>
+                  </div>
+                )}
                 {doc.markdownAvailable && (
                   <div className="doc-row doc-derived-row">
                     <span className="doc-name-block">

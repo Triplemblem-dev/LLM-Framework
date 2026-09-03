@@ -50,7 +50,11 @@ def get_or_create_remote_config(db: Session, user_id: uuid.UUID) -> RemoteAccess
     return config
 
 
-def validate_remote_bind(mode: RemoteAccessMode, raw_address: str) -> str:
+def validate_remote_bind(
+    mode: RemoteAccessMode,
+    raw_address: str,
+    transport: str = "direct",
+) -> str:
     address = raw_address.strip()
     try:
         parsed = ipaddress.ip_address(address)
@@ -58,6 +62,14 @@ def validate_remote_bind(mode: RemoteAccessMode, raw_address: str) -> str:
         raise ValueError("Choose one explicit host interface IP address") from exc
     if mode == RemoteAccessMode.off:
         return address
+    if transport == "tailscale_serve":
+        if mode != RemoteAccessMode.private_vpn:
+            raise ValueError("Tailscale Serve transport requires Private VPN mode")
+        if not parsed.is_loopback:
+            raise ValueError("Tailscale Serve must bind Docker to loopback (127.0.0.1 or ::1)")
+        return address
+    if transport != "direct":
+        raise ValueError("Unsupported remote gateway transport")
     if parsed.is_unspecified or parsed.is_loopback or parsed.is_multicast:
         raise ValueError("Remote access cannot use a wildcard, loopback, or multicast address")
     if mode == RemoteAccessMode.local_network:

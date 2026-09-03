@@ -19,12 +19,14 @@ class RemoteAccessStatusOut(BaseModel):
     gateway_port: int
     gateway_configured: bool
     gateway_running: bool
+    gateway_transport: Literal["direct", "tailscale_serve"]
     api_base_url: str
     bind_address: str
     hostname: str
     network_configuration_valid: bool
     network_configuration_error: str | None
     tailscale_configured: bool
+    certificate_required: bool
     certificate_available: bool
     active_key_count: int
 

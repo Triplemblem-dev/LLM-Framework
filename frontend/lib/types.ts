@@ -564,18 +564,21 @@ export interface OptimizerContextChangeResult {
 }
 
 export type RemoteAccessMode = "off" | "local_network" | "private_vpn";
+export type RemoteGatewayTransport = "direct" | "tailscale_serve";
 
 export interface RemoteAccessStatus {
   mode: RemoteAccessMode;
   gatewayPort: number;
   gatewayConfigured: boolean;
   gatewayRunning: boolean;
+  gatewayTransport: RemoteGatewayTransport;
   apiBaseUrl: string;
   bindAddress: string;
   hostname: string;
   networkConfigurationValid: boolean;
   networkConfigurationError: string | null;
   tailscaleConfigured: boolean;
+  certificateRequired: boolean;
   certificateAvailable: boolean;
   activeKeyCount: number;
 }

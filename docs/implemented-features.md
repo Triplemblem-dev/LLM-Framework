@@ -80,7 +80,9 @@ runtime relationship, context, visible hardware/sensors, processor placement,
 and evidence gaps. Its persistent, cancellable benchmark compares bounded
 context candidates using built-in synthetic prompts and stores measurements in
 PostgreSQL without using private conversations, documents, memories, or
-repositories.
+repositories. The benchmark panel keeps setup, run selection, progress, and
+results in a stable three-step layout. Technical metadata, hardware placement,
+candidate evidence, and individual trials stay collapsed until requested.
 
 Completed comparisons report latency, generation rate, memory, context, power,
 reliability, placement, Pareto tradeoffs, objective weights, confidence, and
@@ -117,12 +119,16 @@ and are not presented as interchangeable.
 
 ## Secure remote API implementation preview
 
-An optional Caddy HTTPS gateway and OpenAI-compatible `/v1` API are implemented
-behind an Off-by-default backend mode. Remote devices use separate hash-stored,
-revocable, domain-scoped keys; remote chat is stateless and retains framework
-prompt, retrieval, memory, and per-domain tuning boundaries. A right-rail panel
-shows mode and gateway state, manages keys, exposes the API address, downloads
-the local CA certificate, and runs a safe gateway check.
+An optional Tailscale Serve/Caddy gateway and OpenAI-compatible `/v1` API are
+implemented behind an Off-by-default backend mode. Tailscale Serve is the
+recommended private transport and keeps Docker bound to host loopback. Remote
+devices use separate hash-stored, revocable, domain-scoped keys; remote chat is
+stateless and retains framework prompt, retrieval, memory, and per-domain
+tuning boundaries. A right-rail panel shows mode and gateway state, manages
+keys, exposes the API address, explains the applicable HTTPS trust model, and
+runs a safe gateway check. A question-mark guide beside the connection-mode
+selector provides prerequisites, environment examples, and start/stop commands
+for Off, local-network, and Tailscale access.
 
 Ollama keeps its native internal adapter. A second adapter supports models
 served by a configured local OpenAI-compatible llama.cpp, LocalAI, or vLLM

@@ -17,6 +17,8 @@ deliberately configures and enables remote access.
 ```text
 Phone or laptop
       ↓ HTTPS + device bearer key
+Tailscale Serve (private tailnet only)
+      ↓ host loopback
 Caddy gateway (optional Compose profile)
       ↓ fixed internal route + gateway secret
 Framework /v1 API
@@ -43,6 +45,8 @@ Local model runtime
   authentication attempts and concurrent remote generations are bounded.
 - The existing application access token is not accepted as a remote device
   key.
+- Tailscale Serve is the recommended private-VPN transport. It terminates
+  trusted HTTPS while Docker publishes the gateway on host loopback only.
 - Caddy exposes only `/health` and `/v1/*`, preserves streaming, adds a secret
   gateway-to-backend header, and has request access logging disabled.
 - Ports 3000 and 8000 bind to loopback by default. PostgreSQL and Ollama are
@@ -73,26 +77,33 @@ the owner has explicitly downloaded it and loaded it into a compatible local
 runtime. The framework does not yet download or license-check Hugging Face
 artifacts itself, and Ollama is still required for document embeddings.
 
-## Preparing the HTTPS gateway
+## Recommended setup: Tailscale Serve
 
-Do not place secrets in this repository. Add these values to the private
-`.env` file actually passed to Docker Compose:
+Install Tailscale on the host and every phone or laptop that should connect.
+Sign them into the same tailnet. Do not enable Tailscale Funnel: Serve is
+private to the tailnet, while Funnel would publish a service to the internet.
+
+Find the host's full Tailscale DNS name. It ends in `.ts.net` and is shown for
+the device in the Tailscale application or admin console. Then add these
+values to the private `.env` beside `docker-compose.yml`:
 
 ```dotenv
 REMOTE_GATEWAY_SHARED_SECRET=<a new random value of at least 32 characters>
-REMOTE_GATEWAY_BIND_ADDRESS=<one exact private LAN or Tailscale IP on this host>
-REMOTE_GATEWAY_HOSTNAME=<the hostname or IP the client will use>
+REMOTE_GATEWAY_TRANSPORT=tailscale_serve
+REMOTE_GATEWAY_BIND_ADDRESS=127.0.0.1
+REMOTE_GATEWAY_HOSTNAME=<this-host>.<this-tailnet>.ts.net
 REMOTE_GATEWAY_PORT=8443
-REMOTE_GATEWAY_PUBLIC_URL=https://<same-hostname-or-ip>:8443
+REMOTE_GATEWAY_CONTAINER_PORT=80
+REMOTE_GATEWAY_PUBLIC_URL=https://<this-host>.<this-tailnet>.ts.net
 ```
 
-`0.0.0.0`, loopback, multicast, and public addresses are rejected for an
-enabled mode. Local-network mode requires a private LAN address. Private-VPN
-mode currently requires a Tailscale IPv4 address in `100.64.0.0/10` or a
-Tailscale IPv6 address in `fd7a:115c:a1e0::/48`.
+Keep the angle-bracket examples out of the real values. The public URL has no
+`:8443`: Tailscale provides standard HTTPS on port 443. The local gateway port
+remains 8443 and is deliberately bound to `127.0.0.1`; do not replace that
+address with the host's `100.x` Tailscale IP on macOS. Container port 80 is an
+internal loopback hop; it is not exposed to the LAN or tailnet.
 
-After editing the private environment file, rebuild the backend so it receives
-the values and start the optional gateway profile:
+Rebuild the backend and start the optional gateway:
 
 ```bash
 docker compose --profile remote up -d --build backend gateway
@@ -101,27 +112,41 @@ docker compose --profile remote up -d --build backend gateway
 When the installation uses an external environment file, keep using its normal
 `--env-file /absolute/path/to/.env` argument in that command.
 
-Open the framework, choose **Remote access**, then:
+On the host, ask Tailscale Serve to publish the loopback gateway privately:
 
-1. Open **Connection mode**, select Local network or Private VPN, and apply it.
-2. Open **Device keys**, name the device, select the minimum required domains,
+```bash
+tailscale serve --bg http://127.0.0.1:8443
+tailscale serve status
+```
+
+Tailscale may ask once for permission to enable HTTPS for the tailnet. The
+gateway remains unavailable to the public internet and no router ports need to
+be opened.
+
+Open the framework on the host, choose **Remote access**, then:
+
+1. Open **Connection mode**. The question-mark button beside **Access from**
+   shows prerequisites, `.env` examples, and start/stop commands for every
+   mode.
+2. Select **Private VPN — Tailscale**, and apply it.
+3. Open **Device keys**, name the device, select the minimum required domains,
    and create the key.
-3. Copy the key immediately. It cannot be displayed again.
-4. Open **Connect a device** to copy the API base URL and test gateway status.
+4. Copy the key immediately. It cannot be displayed again.
+5. Open **Connect a device** to copy the API base URL and test gateway status.
 
-The Caddy internal CA certificate becomes downloadable from that panel after
-the gateway starts. The client device must trust this CA before using the
-HTTPS endpoint without certificate warnings. Only install the certificate on
-devices you control, and remove that trust if the installation is retired.
+The client needs Tailscale and its one-time framework device key. It does not
+need the framework's Caddy CA certificate because Tailscale Serve supplies a
+trusted certificate for the `.ts.net` address.
 
-## Tailscale guidance
+## Direct local-network alternative
 
-Private VPN mode does not install or sign in to Tailscale. Install the official
-Tailscale application on both devices and sign both into the same authorized
-tailnet. Configure the gateway with the host's exact Tailscale IP and DNS name.
-No router port forwarding or UPnP is used. Tailscale uses an external
-coordination service, while model inference and framework storage stay on the
-host.
+The older direct transport remains available for an explicitly configured LAN
+installation. Set `REMOTE_GATEWAY_TRANSPORT=direct`, use one exact private LAN
+address as the bind address, set `REMOTE_GATEWAY_CONTAINER_PORT=443`, and
+include `:8443` in the hostname URL. Direct mode uses Caddy's private CA, so
+each client must install the downloadable CA certificate. Tailscale Serve is
+preferred when access should work consistently across macOS, Linux, Windows,
+phones, and networks.
 
 ## Stopping access
 
@@ -130,6 +155,7 @@ even if the gateway container is still running. To stop the gateway process as
 well:
 
 ```bash
+tailscale serve --https=443 off
 docker compose --profile remote stop gateway
 ```
 
@@ -148,14 +174,15 @@ profiles validate successfully.
 
 A live macOS Docker check additionally verified loopback TLS, `/health`, fixed
 route denial, Off-mode rejection through Caddy, and that gateway logs contain
-neither the test bearer token nor the test prompt body. The following are not
-yet release-verified:
+neither the test bearer token nor the test prompt body. A live Tailscale Serve
+check also verified trusted `.ts.net` HTTPS routing to the loopback-only Caddy
+gateway. The following release acceptance checks remain:
 
 - a second physical device over LAN;
-- Tailscale reachability and disconnect/reconnect behavior;
+- Tailscale reachability and disconnect/reconnect behavior from a second device;
 - host firewall guidance and detection;
 - Windows and Linux gateway behavior;
-- clean-machine certificate installation; and
+- disconnect/reconnect and key-revocation checks from clean client devices; and
 - signed/notarized installer distribution.
 
 Until those checks pass, treat this subsystem as an implementation preview and

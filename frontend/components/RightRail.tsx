@@ -222,6 +222,7 @@ function RemoteAccessPanel({ ws }: { ws: Workspace }) {
   const [selectedDomainIds, setSelectedDomainIds] = useState<string[]>([]);
   const [newToken, setNewToken] = useState<string | null>(null);
   const [connectionResult, setConnectionResult] = useState<string | null>(null);
+  const [connectionHelpOpen, setConnectionHelpOpen] = useState(false);
 
   const domains = ws.state.domains.flatMap((domain) => [
     { id: domain.id, path: domain.name },
@@ -356,11 +357,22 @@ function RemoteAccessPanel({ ws }: { ws: Workspace }) {
       >
         <div className={`remote-status ${status?.mode === "off" ? "off" : "on"}`}>
           <strong>{status?.mode === "off" ? "Remote access is blocked" : "Remote API access is enabled"}</strong>
-          <span>{status?.gatewayRunning ? "HTTPS gateway is running" : status?.gatewayConfigured ? "Gateway configured but not running" : "Gateway setup is incomplete"}</span>
+          <span>{status?.gatewayRunning ? "Secure gateway is running" : status?.gatewayConfigured ? "Gateway configured but not running" : "Gateway setup is incomplete"}</span>
         </div>
         <div className="settings-field">
-          <label>Access from</label>
-          <select value={draftMode} onChange={(event) => setDraftMode(event.target.value as RemoteAccessMode)}>
+          <div className="settings-label-row">
+            <label htmlFor="remote-connection-mode">Access from</label>
+            <button
+              className="field-help-button"
+              type="button"
+              aria-label="Explain remote access connection modes"
+              title="How to set up remote access"
+              onClick={() => setConnectionHelpOpen(true)}
+            >
+              ?
+            </button>
+          </div>
+          <select id="remote-connection-mode" value={draftMode} onChange={(event) => setDraftMode(event.target.value as RemoteAccessMode)}>
             <option value="off">Off — this computer only</option>
             <option value="local_network">Local network — same Wi-Fi / LAN</option>
             <option value="private_vpn">Private VPN — Tailscale</option>
@@ -373,7 +385,7 @@ function RemoteAccessPanel({ ws }: { ws: Workspace }) {
           <p className="remote-warning">Set the gateway secret and network address in the private runtime .env, then start the optional gateway. The app will not expose itself automatically.</p>
         )}
         {status?.networkConfigurationError && <p className="remote-warning">{status.networkConfigurationError}</p>}
-        {status && <p className="settings-hint">Selected host interface: <code>{status.bindAddress}</code></p>}
+        {status && <p className="settings-hint">Gateway bind: <code>{status.bindAddress}</code>{status.gatewayTransport === "tailscale_serve" ? " (private host loopback)" : ""}</p>}
       </PanelSection>
 
       <PanelSection
@@ -421,7 +433,7 @@ function RemoteAccessPanel({ ws }: { ws: Workspace }) {
       <PanelSection
         id="remote-connect"
         title="Connect a device"
-        description="HTTPS endpoint and client trust"
+        description="Private HTTPS endpoint for your client"
       >
         <p className="panel-intro">Use an OpenAI-compatible client with this base URL:</p>
         <code className="remote-api-url">{status?.apiBaseUrl}</code>
@@ -431,14 +443,133 @@ function RemoteAccessPanel({ ws }: { ws: Workspace }) {
         </div>
         {connectionResult && <p className="remote-note">{connectionResult}</p>}
         <p className="settings-hint">Choose a model named <code>domain/&lt;domain-id&gt;</code>. The model list only shows domains approved for that device key.</p>
-        {status?.certificateAvailable ? (
-          <button className="btn-ghost remote-full-button" type="button" onClick={downloadCertificate}>Download HTTPS trust certificate</button>
+        {status?.certificateRequired ? (
+          status.certificateAvailable ? (
+            <button className="btn-ghost remote-full-button" type="button" onClick={downloadCertificate}>Download HTTPS trust certificate</button>
+          ) : (
+            <p className="remote-warning">The HTTPS certificate becomes available after the gateway starts once.</p>
+          )
         ) : (
-          <p className="remote-warning">The HTTPS certificate becomes available after the gateway starts once.</p>
+          <p className="remote-note">Tailscale provides the trusted HTTPS certificate. No framework certificate needs to be installed on the client.</p>
         )}
-        {status?.mode === "private_vpn" && <p className="remote-note">A Tailscale account is required. Install the official Tailscale app on this computer and the remote device, sign both into the same private tailnet, and use this computer&apos;s Tailscale DNS name. Model inference remains on this host; no router port forwarding is needed.</p>}
+        {status?.mode === "private_vpn" && <p className="remote-note">Install Tailscale on this computer and the remote device, then sign both into the same private tailnet. Use this host&apos;s displayed <code>.ts.net</code> URL. Model inference remains on this host; no router port forwarding is needed.</p>}
       </PanelSection>
+
+      <RemoteConnectionHelp
+        open={connectionHelpOpen}
+        onClose={() => setConnectionHelpOpen(false)}
+      />
     </>
+  );
+}
+
+const TAILSCALE_ENV_EXAMPLE = [
+  "REMOTE_GATEWAY_SHARED_SECRET=<random value of at least 32 characters>",
+  "REMOTE_GATEWAY_TRANSPORT=tailscale_serve",
+  "REMOTE_GATEWAY_BIND_ADDRESS=127.0.0.1",
+  "REMOTE_GATEWAY_HOSTNAME=<host>.<tailnet>.ts.net",
+  "REMOTE_GATEWAY_PORT=8443",
+  "REMOTE_GATEWAY_CONTAINER_PORT=80",
+  "REMOTE_GATEWAY_PUBLIC_URL=https://<host>.<tailnet>.ts.net",
+].join("\n");
+
+const TAILSCALE_START_COMMANDS = [
+  "docker compose up -d --build backend frontend",
+  "docker compose --profile remote up -d gateway",
+  "tailscale serve --bg http://127.0.0.1:8443",
+].join("\n");
+
+const TAILSCALE_STOP_COMMANDS = [
+  "tailscale serve --https=443 off",
+  "docker compose --profile remote stop gateway",
+].join("\n");
+
+const LAN_ENV_EXAMPLE = [
+  "REMOTE_GATEWAY_SHARED_SECRET=<random value of at least 32 characters>",
+  "REMOTE_GATEWAY_TRANSPORT=direct",
+  "REMOTE_GATEWAY_BIND_ADDRESS=192.168.1.50",
+  "REMOTE_GATEWAY_HOSTNAME=192.168.1.50",
+  "REMOTE_GATEWAY_PORT=8443",
+  "REMOTE_GATEWAY_CONTAINER_PORT=443",
+  "REMOTE_GATEWAY_PUBLIC_URL=https://192.168.1.50:8443",
+].join("\n");
+
+const GATEWAY_START_COMMANDS = [
+  "docker compose up -d --build backend frontend",
+  "docker compose --profile remote up -d gateway",
+].join("\n");
+
+function RemoteConnectionHelp({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const backdropRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  return (
+    <div
+      className={`backdrop${open ? " open" : ""}`}
+      ref={backdropRef}
+      onMouseDown={(event) => {
+        if (event.target === backdropRef.current) onClose();
+      }}
+    >
+      {open && (
+        <section className="modal help-modal remote-help-modal" role="dialog" aria-modal="true" aria-labelledby="remote-help-title">
+          <h2 id="remote-help-title">Set up remote access</h2>
+          <div className="sub">Choose one approach. Run commands from the repository folder.</div>
+
+          <div className="help-body scroll">
+            <div className="help-section remote-help-section">
+              <h3>Off — this computer only</h3>
+              <p>No setup is needed. The framework remains available locally and rejects remote API calls.</p>
+              <p>Select <b>Off — this computer only</b>, apply it, and stop any previously configured remote gateway:</p>
+              <pre><code>{TAILSCALE_STOP_COMMANDS}</code></pre>
+            </div>
+
+            <div className="help-section remote-help-section">
+              <h3>Private VPN — Tailscale (recommended)</h3>
+              <ol>
+                <li>Install Tailscale on the framework host and each remote phone or laptop.</li>
+                <li>Sign every device into the same tailnet and enable Tailscale Serve.</li>
+                <li>Find the host&apos;s full <code>.ts.net</code> name in Tailscale.</li>
+                <li>Add the following to the private <code>.env</code>, replacing both placeholders:</li>
+              </ol>
+              <pre><code>{TAILSCALE_ENV_EXAMPLE}</code></pre>
+              <p>Start the framework and private route:</p>
+              <pre><code>{TAILSCALE_START_COMMANDS}</code></pre>
+              <p>Select <b>Private VPN — Tailscale</b>, apply it, and create a device key for the client. Use the displayed <code>.ts.net</code> API URL. No framework certificate or router port forwarding is required.</p>
+              <p>To end Tailscale access, select <b>Off</b> in the framework and run:</p>
+              <pre><code>{TAILSCALE_STOP_COMMANDS}</code></pre>
+            </div>
+
+            <div className="help-section remote-help-section">
+              <h3>Local network — same Wi-Fi or LAN</h3>
+              <ol>
+                <li>Find the host computer&apos;s private LAN address, such as <code>192.168.1.50</code>.</li>
+                <li>Allow inbound TCP port <code>8443</code> in the host firewall only for the private network.</li>
+                <li>Add the following to the private <code>.env</code>, replacing the example address:</li>
+              </ol>
+              <pre><code>{LAN_ENV_EXAMPLE}</code></pre>
+              <p>Start the framework and gateway:</p>
+              <pre><code>{GATEWAY_START_COMMANDS}</code></pre>
+              <p>Select <b>Local network</b>, apply it, and create a device key. On each client, download and trust the framework HTTPS certificate from <b>Connect a device</b>.</p>
+              <p>To end LAN access, select <b>Off</b> in the framework and run:</p>
+              <pre><code>docker compose --profile remote stop gateway</code></pre>
+            </div>
+          </div>
+
+          <div className="modal-actions">
+            <button className="btn-primary" type="button" onClick={onClose}>Close</button>
+          </div>
+        </section>
+      )}
+    </div>
   );
 }
 
@@ -796,11 +927,11 @@ function PerformancePanel({ ws }: { ws: Workspace }) {
         >
           <section className="optimizer-card optimizer-benchmark-plan" aria-labelledby="optimizer-benchmark-heading">
             <div className="optimizer-card-heading">
-              <h3 id="optimizer-benchmark-heading">Prepare a run</h3>
-              <span className="optimizer-status available">Persistent</span>
+              <h3 id="optimizer-benchmark-heading">1. Choose benchmark</h3>
+              <span className="optimizer-status">Setup only</span>
             </div>
             <p className="optimizer-scope-note">
-              Uses only built-in synthetic prompts. Your conversations, documents, memories, and repositories are never benchmark input.
+              Uses built-in test prompts only. Your conversations and documents are not used.
             </p>
             <div className="settings-field">
               <label htmlFor="optimizer-kind">Test type</label>
@@ -833,30 +964,29 @@ function PerformancePanel({ ws }: { ws: Workspace }) {
               <small className="optimizer-field-help">Context comparisons use three synthetic workloads. Repeats are compared only with the same workload.</small>
             </div>
             <button className="btn-outline optimizer-refresh" type="button" onClick={prepareRun} disabled={!model || state.models.length === 0}>
-              Review benchmark
+              Create run plan
             </button>
           </section>
 
-          {(state.optimizerRunsLoading || state.optimizerRuns.length > 0) && (
-            <div className="settings-field optimizer-history-select">
-              <label htmlFor="optimizer-history">Saved runs</label>
-              <select
-                id="optimizer-history"
-                value={selectedRunId ?? ""}
-                onChange={(event) => setSelectedRunId(event.target.value || null)}
-                disabled={state.optimizerRunsLoading}
-              >
-                {state.optimizerRunsLoading && state.optimizerRuns.length === 0 && <option value="">Loading…</option>}
-                {state.optimizerRuns.map((run) => (
-                  <option value={run.id} key={run.id}>
-                    {new Date(run.createdAt).toLocaleString()} · {run.benchmarkKind === "context_comparison" ? "comparison" : "baseline"} · {run.modelTag} · {run.state}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          <div className="settings-field optimizer-history-select">
+            <label htmlFor="optimizer-history">2. Current or saved run</label>
+            <select
+              id="optimizer-history"
+              value={selectedRunId ?? ""}
+              onChange={(event) => setSelectedRunId(event.target.value || null)}
+              disabled={state.optimizerRunsLoading || state.optimizerRuns.length === 0}
+            >
+              {state.optimizerRunsLoading && state.optimizerRuns.length === 0 && <option value="">Loading runs…</option>}
+              {!state.optimizerRunsLoading && state.optimizerRuns.length === 0 && <option value="">No run created yet</option>}
+              {state.optimizerRuns.map((run) => (
+                <option value={run.id} key={run.id}>
+                  {new Date(run.createdAt).toLocaleString()} · {run.benchmarkKind === "context_comparison" ? "comparison" : "baseline"} · {run.state}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          {selectedRun && (
+          {selectedRun ? (
             <BenchmarkRunCard
               run={selectedRun}
               placement={runPlacement}
@@ -879,6 +1009,18 @@ function PerformancePanel({ ws }: { ws: Workspace }) {
                 }
               }}
             />
+          ) : (
+            <section className="optimizer-card optimizer-run optimizer-run-empty" aria-label="Benchmark run status">
+              <div className="optimizer-card-heading">
+                <h3>3. Run status</h3>
+                <span className="optimizer-status">Waiting</span>
+              </div>
+              <p>Choose the test above and create a run plan. Its progress and results will stay together here.</p>
+              <div className="optimizer-progress idle" aria-live="polite">
+                <div><strong>Not started</strong><span>0 trials</span></div>
+                <progress value={0} max={1} aria-label="Benchmark not started" />
+              </div>
+            </section>
           )}
 
           {state.optimizerContextAudits.length > 0 && (
@@ -1016,22 +1158,19 @@ function BenchmarkRunCard({
   return (
     <section className="optimizer-card optimizer-run" aria-labelledby={`optimizer-run-${run.id}`}>
       <div className="optimizer-card-heading">
-        <h3 id={`optimizer-run-${run.id}`}>{comparison ? "Context comparison" : "Current baseline"} · {run.mode}</h3>
+        <h3 id={`optimizer-run-${run.id}`}>3. Run status</h3>
         <span className={`optimizer-status ${run.state === "failed" ? "unavailable" : run.state === "completed" ? "available" : "partial"}`}>
           {run.state}
         </span>
       </div>
-      <div className="optimizer-model-name">{run.modelTag}</div>
-      <dl className="optimizer-facts">
+      <div className="optimizer-run-title">
+        <strong>{comparison ? "Context comparison" : "Current baseline"}</strong>
+        <span>{run.modelTag}</span>
+      </div>
+      <dl className="optimizer-facts optimizer-run-summary">
         <div><dt>Goal</dt><dd>{run.objective.replace("_", " ")}</dd></div>
-        <div><dt>Endpoint</dt><dd><code>{run.endpointDisplay}</code></dd></div>
-        <div><dt>Workload</dt><dd>{run.workloadVersion}</dd></div>
-        <div><dt>Runner</dt><dd>{run.runnerVersion}</dd></div>
-        <div><dt>Ollama</dt><dd>{run.ollamaVersion ?? "Unavailable"}</dd></div>
-        <div><dt>Captured</dt><dd>{new Date(run.createdAt).toLocaleString()}</dd></div>
+        <div><dt>Test length</dt><dd>{run.mode}</dd></div>
         <div><dt>Candidates</dt><dd>{run.candidates.length} · {contexts.length ? `${Math.min(...contexts).toLocaleString()}–${Math.max(...contexts).toLocaleString()}` : "Default"} tokens</dd></div>
-        <div><dt>Profile context when measured</dt><dd>{currentCandidate?.settings.num_ctx?.toLocaleString() ?? "Default"} tokens</dd></div>
-        <div><dt>Per response</dt><dd>up to {currentCandidate?.settings.num_predict ?? "?"} tokens</dd></div>
         <div><dt>Estimated time</dt><dd>up to {Math.ceil(run.estimatedSeconds / 60)} minutes</dd></div>
       </dl>
       {comparison && (
@@ -1046,12 +1185,26 @@ function BenchmarkRunCard({
       )}
       <p className="optimizer-disruption">{run.disruptionNotice}</p>
 
-      {(active || terminal) && (
-        <div className="optimizer-progress" aria-live="polite">
-          <div><strong>{run.currentStageDetail ?? run.state}</strong><span>{run.completedTrials} / {run.totalTrials} trials · {optimizerElapsed(run.startedAt, run.completedAt)}</span></div>
-          <progress value={run.completedTrials} max={Math.max(1, run.totalTrials)} aria-label={`Benchmark ${progress}% complete`} />
+      <div className={`optimizer-progress${run.state === "planned" ? " idle" : ""}`} aria-live="polite">
+        <div>
+          <strong>{run.state === "planned" ? "Ready to run" : run.currentStageDetail ?? run.state}</strong>
+          <span>{run.completedTrials} / {run.totalTrials} trials · {run.state === "planned" ? `up to ${Math.ceil(run.estimatedSeconds / 60)} min` : optimizerElapsed(run.startedAt, run.completedAt)}</span>
         </div>
-      )}
+        <progress value={run.completedTrials} max={Math.max(1, run.totalTrials)} aria-label={`Benchmark ${progress}% complete`} />
+      </div>
+
+      <details className="optimizer-run-details">
+        <summary>Technical run details</summary>
+        <dl className="optimizer-facts">
+          <div><dt>Endpoint</dt><dd><code>{run.endpointDisplay}</code></dd></div>
+          <div><dt>Workload</dt><dd>{run.workloadVersion}</dd></div>
+          <div><dt>Runner</dt><dd>{run.runnerVersion}</dd></div>
+          <div><dt>Ollama</dt><dd>{run.ollamaVersion ?? "Unavailable"}</dd></div>
+          <div><dt>Created</dt><dd>{new Date(run.createdAt).toLocaleString()}</dd></div>
+          <div><dt>Starting context</dt><dd>{currentCandidate?.settings.num_ctx?.toLocaleString() ?? "Default"} tokens</dd></div>
+          <div><dt>Per response</dt><dd>up to {currentCandidate?.settings.num_predict ?? "?"} tokens</dd></div>
+        </dl>
+      </details>
 
       {run.errorMessage && <p className="optimizer-client-error" role="alert">{run.errorMessage}</p>}
 
@@ -1062,21 +1215,43 @@ function BenchmarkRunCard({
         </div>
       )}
 
-      {(terminal || placement) && (
-        <HardwareAllocation placement={placement} backend={acceleratorBackend} />
-      )}
+      <details className="optimizer-run-details">
+        <summary>Hardware during this run</summary>
+        {(terminal || placement) ? (
+          <HardwareAllocation placement={placement} backend={acceleratorBackend} />
+        ) : (
+          <p>Hardware placement will appear here after the model starts.</p>
+        )}
+      </details>
 
-      {!comparison && medians && (
-        <div className="optimizer-results" aria-label="Measured baseline medians">
-          <article><span>First token</span><strong>{optimizerMetric(medians.ttft_ms, "ms")}</strong></article>
-          <article><span>Generation</span><strong>{optimizerMetric(medians.generation_tokens_per_second, "tok/s", 2)}</strong></article>
-          <article><span>Prompt processing</span><strong>{optimizerMetric(medians.prompt_tokens_per_second, "tok/s", 2)}</strong></article>
-          <article><span>Total latency</span><strong>{optimizerMetric(medians.total_duration_ms, "ms")}</strong></article>
+      <section className="optimizer-outcome" aria-label="Benchmark results">
+        <div className="optimizer-card-heading">
+          <h4>Results</h4>
+          <span className={`optimizer-status ${recommendation?.winner_candidate_id || medians ? "available" : active ? "partial" : ""}`}>
+            {recommendation?.winner_candidate_id || medians ? "Ready" : active ? "Measuring" : terminal ? run.state : "Waiting"}
+          </span>
         </div>
-      )}
+        {!medians && !recommendation?.winner_candidate_id && (
+          <p className="optimizer-result-placeholder">
+            {run.state === "planned"
+              ? "Start the benchmark to measure this plan. Results will appear in this section."
+              : active
+                ? "The run is in progress. Results will appear here when enough measurements are complete."
+                : "This run ended without a complete result or recommendation."}
+          </p>
+        )}
 
-      {recommendation && recommendation.winner_candidate_id && (
-        <section className="optimizer-recommendation" aria-label="Context recommendation">
+        {!comparison && medians && (
+          <div className="optimizer-results" aria-label="Measured baseline medians">
+            <article><span>First token</span><strong>{optimizerMetric(medians.ttft_ms, "ms")}</strong></article>
+            <article><span>Generation</span><strong>{optimizerMetric(medians.generation_tokens_per_second, "tok/s", 2)}</strong></article>
+            <article><span>Prompt processing</span><strong>{optimizerMetric(medians.prompt_tokens_per_second, "tok/s", 2)}</strong></article>
+            <article><span>Total latency</span><strong>{optimizerMetric(medians.total_duration_ms, "ms")}</strong></article>
+          </div>
+        )}
+
+        {recommendation && recommendation.winner_candidate_id && (
+          <section className="optimizer-recommendation" aria-label="Context recommendation">
           <div className="optimizer-recommendation-heading">
             <span>Recommended for {run.objective.replace("_", " ")}</span>
             <strong>{recommendation.winning_context_length?.toLocaleString()} tokens</strong>
@@ -1132,8 +1307,9 @@ function BenchmarkRunCard({
             <button className="btn-outline" type="button" onClick={onKeepCurrent}>Keep current settings</button>
             <button className="btn-outline" type="button" onClick={onDownload}>Download redacted report</button>
           </div>
-        </section>
-      )}
+          </section>
+        )}
+      </section>
 
       {applyPreview && (
         <section className={`optimizer-apply-preview ${applyPreview.status}`} aria-label="Setting change preview">
@@ -1214,9 +1390,10 @@ function BenchmarkRunCard({
         </section>
       )}
 
-      {comparison && recommendation && recommendation.candidate_results.length > 0 && (
-        <div className="optimizer-comparison" aria-label="Context candidate comparison">
-          <div className="optimizer-subheading">Candidate evidence</div>
+      <details className="optimizer-evidence-details">
+        <summary>Candidate evidence{comparison && recommendation ? ` (${recommendation.candidate_results.length})` : ""}</summary>
+        {comparison && recommendation && recommendation.candidate_results.length > 0 ? (
+          <div className="optimizer-comparison" aria-label="Context candidate comparison">
           {recommendation.candidate_results.map((candidate) => {
             const isWinner = candidate.candidate_id === recommendation.winner_candidate_id;
             const pareto = recommendation.pareto_candidate_ids.includes(candidate.candidate_id);
@@ -1257,12 +1434,16 @@ function BenchmarkRunCard({
             </dl>
             <p>Pareto options are candidates that were not worse on every measured tradeoff.</p>
           </details>
-        </div>
-      )}
+          </div>
+        ) : (
+          <p>Candidate measurements will be available after a context comparison finishes.</p>
+        )}
+      </details>
 
-      {allTrials.length > 0 && (
-        <details className="optimizer-trials">
-          <summary>Trial details ({allTrials.length})</summary>
+      <details className="optimizer-trials">
+        <summary>Trial details ({allTrials.length})</summary>
+        {allTrials.length > 0 ? (
+          <>
           {allTrials.map(({ candidate, measurement }) => (
             <div key={measurement.id}>
               <strong>{candidate.settings.num_ctx?.toLocaleString() ?? "Default"} context · {measurement.isWarmup ? "Warm-up" : `Trial ${measurement.trialIndex}`} · {measurement.workloadCase.replaceAll("_", " ")}</strong>
@@ -1271,8 +1452,11 @@ function BenchmarkRunCard({
               {measurement.errorMessage && <span>{measurement.errorMessage}</span>}
             </div>
           ))}
-        </details>
-      )}
+          </>
+        ) : (
+          <p>No trial measurements yet.</p>
+        )}
+      </details>
 
       <div className="optimizer-run-actions">
         {run.state === "planned" && <button className="btn-primary" type="button" onClick={onStart}>Run benchmark</button>}

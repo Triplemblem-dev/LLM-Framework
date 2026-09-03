@@ -5,16 +5,16 @@ from sqlalchemy import delete
 
 from app.config import settings
 from app.db import SessionLocal
-from app.models import Conversation, RemoteAccessConfig, RemoteApiKey
-from app.remote_access import get_or_create_remote_config
+from app.models import Conversation, RemoteAccessConfig, RemoteAccessMode, RemoteApiKey, User
+from app.remote_access import get_or_create_remote_config, validate_remote_bind
 from app.seed import DEFAULT_USER_EMAIL
-from app.models import User
 
 
 @pytest.fixture
 def remote_test_environment(monkeypatch):
     gateway_secret = "test-gateway-secret-that-is-not-used-outside-tests"
     monkeypatch.setattr(settings, "remote_gateway_shared_secret", gateway_secret)
+    monkeypatch.setattr(settings, "remote_gateway_transport", "direct")
     monkeypatch.setattr(settings, "remote_gateway_bind_address", "192.168.50.10")
     key_name_prefix = f"remote-test-{uuid.uuid4()}"
 
@@ -83,6 +83,8 @@ def test_remote_api_is_scoped_stateless_revocable_and_openai_compatible(
     )
     assert enabled.status_code == 200
     assert enabled.json()["mode"] == "local_network"
+    assert enabled.json()["gateway_transport"] == "direct"
+    assert enabled.json()["certificate_required"] is True
 
     wrong_gateway = client.get(
         "/v1/models",
@@ -167,3 +169,46 @@ def test_remote_api_is_scoped_stateless_revocable_and_openai_compatible(
     revoked = client.delete(f"/remote-access/keys/{created['id']}")
     assert revoked.status_code == 200
     assert client.get("/v1/models", headers=headers).status_code == 401
+
+
+def test_tailscale_serve_requires_private_vpn_and_loopback():
+    assert (
+        validate_remote_bind(
+            RemoteAccessMode.private_vpn,
+            "127.0.0.1",
+            "tailscale_serve",
+        )
+        == "127.0.0.1"
+    )
+
+    with pytest.raises(ValueError, match="requires Private VPN"):
+        validate_remote_bind(
+            RemoteAccessMode.local_network,
+            "127.0.0.1",
+            "tailscale_serve",
+        )
+
+    with pytest.raises(ValueError, match="must bind Docker to loopback"):
+        validate_remote_bind(
+            RemoteAccessMode.private_vpn,
+            "100.123.119.117",
+            "tailscale_serve",
+        )
+
+
+def test_direct_private_vpn_still_requires_a_tailscale_address():
+    assert (
+        validate_remote_bind(
+            RemoteAccessMode.private_vpn,
+            "100.123.119.117",
+            "direct",
+        )
+        == "100.123.119.117"
+    )
+
+    with pytest.raises(ValueError, match="cannot use a wildcard, loopback"):
+        validate_remote_bind(
+            RemoteAccessMode.private_vpn,
+            "127.0.0.1",
+            "direct",
+        )

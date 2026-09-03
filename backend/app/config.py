@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -30,6 +32,7 @@ class Settings(BaseSettings):
     repository_character_limit: int = 12_000
     optimizer_context_ceiling: int = Field(default=65_536, ge=512, le=262_144)
     remote_gateway_shared_secret: str = ""
+    remote_gateway_transport: Literal["direct", "tailscale_serve"] = "direct"
     remote_gateway_public_url: str = "https://localhost:8443"
     remote_gateway_bind_address: str = "127.0.0.1"
     remote_gateway_hostname: str = "localhost"

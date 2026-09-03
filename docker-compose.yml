@@ -67,6 +67,7 @@ services:
       REPOSITORY_CHARACTER_LIMIT: ${REPOSITORY_CHARACTER_LIMIT:-12000}
       OPTIMIZER_CONTEXT_CEILING: ${OPTIMIZER_CONTEXT_CEILING:-65536}
       REMOTE_GATEWAY_SHARED_SECRET: ${REMOTE_GATEWAY_SHARED_SECRET:-}
+      REMOTE_GATEWAY_TRANSPORT: ${REMOTE_GATEWAY_TRANSPORT:-direct}
       REMOTE_GATEWAY_PUBLIC_URL: ${REMOTE_GATEWAY_PUBLIC_URL:-https://localhost:8443}
       REMOTE_GATEWAY_BIND_ADDRESS: ${REMOTE_GATEWAY_BIND_ADDRESS:-127.0.0.1}
       REMOTE_GATEWAY_HOSTNAME: ${REMOTE_GATEWAY_HOSTNAME:-localhost}
@@ -121,16 +122,27 @@ services:
     depends_on:
       - backend
     environment:
+      REMOTE_GATEWAY_TRANSPORT: ${REMOTE_GATEWAY_TRANSPORT:-direct}
       REMOTE_GATEWAY_HOSTNAME: ${REMOTE_GATEWAY_HOSTNAME:-localhost}
       REMOTE_GATEWAY_SHARED_SECRET: ${REMOTE_GATEWAY_SHARED_SECRET:-}
     volumes:
       - ./gateway/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./gateway/Caddyfile.tailscale:/etc/caddy/Caddyfile.tailscale:ro
       - gateway_data:/data
       - gateway_config:/config
     networks:
       - gateway_internal
     ports:
-      - "${REMOTE_GATEWAY_BIND_ADDRESS:-127.0.0.1}:${REMOTE_GATEWAY_PORT:-8443}:443"
+      - "${REMOTE_GATEWAY_BIND_ADDRESS:-127.0.0.1}:${REMOTE_GATEWAY_PORT:-8443}:${REMOTE_GATEWAY_CONTAINER_PORT:-443}"
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        case "$${REMOTE_GATEWAY_TRANSPORT}" in
+          direct) exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile ;;
+          tailscale_serve) exec caddy run --config /etc/caddy/Caddyfile.tailscale --adapter caddyfile ;;
+          *) echo "Unsupported REMOTE_GATEWAY_TRANSPORT" >&2; exit 1 ;;
+        esac
 
 volumes:
   postgres_data:

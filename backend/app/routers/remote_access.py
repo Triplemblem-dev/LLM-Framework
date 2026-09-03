@@ -56,7 +56,11 @@ def _network_validation(mode: RemoteAccessMode) -> tuple[bool, str | None]:
     if mode == RemoteAccessMode.off:
         return True, None
     try:
-        validate_remote_bind(mode, settings.remote_gateway_bind_address)
+        validate_remote_bind(
+            mode,
+            settings.remote_gateway_bind_address,
+            settings.remote_gateway_transport,
+        )
     except ValueError as exc:
         return False, str(exc)
     return True, None
@@ -78,14 +82,18 @@ def get_remote_access(db: Session = Depends(get_db)):
         gateway_port=config.gateway_port,
         gateway_configured=bool(settings.remote_gateway_shared_secret.strip()),
         gateway_running=_gateway_running(),
+        gateway_transport=settings.remote_gateway_transport,
         api_base_url=settings.remote_gateway_public_url.rstrip("/") + "/v1",
         bind_address=settings.remote_gateway_bind_address,
         hostname=settings.remote_gateway_hostname,
         network_configuration_valid=network_valid,
         network_configuration_error=network_error,
         tailscale_configured=(
-            config.mode == RemoteAccessMode.private_vpn and network_valid
+            config.mode == RemoteAccessMode.private_vpn
+            and settings.remote_gateway_transport == "tailscale_serve"
+            and network_valid
         ),
+        certificate_required=settings.remote_gateway_transport == "direct",
         certificate_available=ca_path.is_file(),
         active_key_count=active_keys,
     )
@@ -102,7 +110,11 @@ def update_remote_access(body: RemoteAccessUpdate, db: Session = Depends(get_db)
         )
     if body.mode != RemoteAccessMode.off:
         try:
-            validate_remote_bind(body.mode, settings.remote_gateway_bind_address)
+            validate_remote_bind(
+                body.mode,
+                settings.remote_gateway_bind_address,
+                settings.remote_gateway_transport,
+            )
         except ValueError as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
     config.mode = body.mode
@@ -126,7 +138,9 @@ def test_remote_connection(db: Session = Depends(get_db)):
     elif not network_valid:
         detail = network_error or "The selected interface is invalid."
     elif not running:
-        detail = "The HTTPS gateway is not running."
+        detail = "The gateway container is not running."
+    elif settings.remote_gateway_transport == "tailscale_serve":
+        detail = "The local gateway is ready. Test the displayed HTTPS URL from another device signed into the same tailnet."
     else:
         detail = "The gateway is reachable from the framework. Test the displayed HTTPS URL from the client device next."
     return RemoteConnectionTestOut(
